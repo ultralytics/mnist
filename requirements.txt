@@ -1,0 +1,6 @@
+pip3 install -U -r requirements.txt
+numpy
+torch
+torchvision
+opencv-python
+
