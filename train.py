@@ -2,7 +2,6 @@ import scipy.io
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
 
 from utils import *
 
@@ -75,13 +74,14 @@ class ConvNetb(nn.Module):
         x = x.reshape(x.size(0), -1)
         # x, _, _ = normalize(x,1)
         x = self.fc(x)
+        # x = F.sigmoid(x)
         # x = F.log_softmax(x, dim=1)  # ONLY for use with nn.NLLLoss
         return x
 
 
 def main(model):
     lr = .001
-    epochs = 10
+    epochs = 30
     printerval = 1
     patience = 200
     batch_size = 1000
@@ -120,12 +120,13 @@ def main(model):
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
-
     def train(model):
         for i, (x, y) in enumerate(train_loader2):
+            #y = torch.from_numpy(np.unpackbits(y.byte()).reshape(y.shape[0],8)).float()
             x, y = x.to(device), y.to(device)
+
             yhat = model(x)  # 512x10
-            loss = criteria(yhat, y)
+            loss = criteria(yhat,y)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -133,14 +134,16 @@ def main(model):
     def test(model):
         accuracy, loss = 0, 0
         for i, (x, y) in enumerate(test_loader2):
+            #yb = torch.from_numpy(np.unpackbits(y.byte()).reshape(y.shape[0],8)).float()
             x, y = x.to(device), y.to(device)
+
             yhat = model(x)
             loss += criteria(yhat, y)
-            accuracy += (torch.argmax(yhat.data, 1) == y).sum()
 
+            yhat_number = torch.argmax(yhat.data, 1)
+            #yhat_number = np.packbits(torch.round(yhat.data).byte())
 
-
-
+            accuracy += (yhat_number == y).sum()
         return loss / (i + 1), 100.0 * accuracy.cpu().item() / ntest
 
     for epoch in range(epochs):
