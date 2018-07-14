@@ -81,14 +81,19 @@ class ConvNetb(nn.Module):
 
 def main(model):
     lr = .001
-    epochs = 30
+    epochs = 10
     printerval = 1
     patience = 200
     batch_size = 1000
     cuda = torch.cuda.is_available()
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
-    torch.manual_seed(1)
+
+    np.random.seed(0)
+    torch.manual_seed(0)
+    if cuda:
+        torch.cuda.manual_seed(0)
+        torch.cuda.manual_seed_all(0)
 
     # MNIST Dataset
     # tforms = transforms.Compose([torchvision.transforms.RandomAffine(
@@ -107,49 +112,63 @@ def main(model):
     #                     {'x': test.test_data.unsqueeze(1).numpy(), 'y': test.test_labels.squeeze().numpy()})
 
     mat = scipy.io.loadmat('data/MNISTtrain.mat')
+    i = torch.nonzero((mat['y'] == 0).squeeze() | (torch.rand(mat['y'].shape[1]) > 0.9).squeeze()).long().squeeze()
+    i = i[0:11000]
+    mat['x'] = mat['x'][i]
+    mat['y'] = mat['y'][0, i].reshape(1,-1)
+
     train_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long()
     train_loader2 = create_batches(dataset=train_data, batch_size=batch_size, shuffle=True)
 
     mat = scipy.io.loadmat('data/MNISTtest.mat')
     test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long()
-    test_loader2 = create_batches(dataset=test_data, batch_size=10000)
-    ntest = len(test_data[1])
+    # test_loader2 = create_batches(dataset=test_data, batch_size=10000)
+    # ntest = len(test_data[1])
 
     model = model.to(device)
-    criteria = nn.CrossEntropyLoss()  # nn.NLLLoss(), nn.CrossEntropyLoss()  # nn.MSELoss()
+    weight = 1/torch.cuda.FloatTensor([10,1,1,1,1,1,1,1,1,1])
+    weight = weight / weight.sum()
+    criteria0 = nn.BCELoss()  # nn.NLLLoss(), nn.CrossEntropyLoss()  # nn.MSELoss()
+    criteria1 = nn.CrossEntropyLoss(weight=weight)  # nn.NLLLoss(), nn.CrossEntropyLoss()  # nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
     def train(model):
         for i, (x, y) in enumerate(train_loader2):
-            #y = torch.from_numpy(np.unpackbits(y.byte()).reshape(y.shape[0],8)).float()
+            # y = torch.from_numpy(np.unpackbits(y.byte()).reshape(y.shape[0],8)).float()
             x, y = x.to(device), y.to(device)
 
+            yb = torch.zeros((y.shape[0], 10)).to(device)
+            yb[range(y.shape[0]), y] = 1
+
             yhat = model(x)  # 512x10
-            loss = criteria(yhat,y)
+            loss = criteria1(yhat, y)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
     def test(model):
-        accuracy, loss = 0, 0
-        for i, (x, y) in enumerate(test_loader2):
-            #yb = torch.from_numpy(np.unpackbits(y.byte()).reshape(y.shape[0],8)).float()
-            x, y = x.to(device), y.to(device)
+        x, y = test_data
+        # yb = torch.from_numpy(np.unpackbits(y.byte()).reshape(y.shape[0],8)).float()
+        x, y = x.to(device), y.to(device)
 
-            yhat = model(x)
-            loss += criteria(yhat, y)
+        yhat = model(x)
+        loss = criteria1(yhat, y)
 
-            yhat_number = torch.argmax(yhat.data, 1)
-            #yhat_number = np.packbits(torch.round(yhat.data).byte())
+        yhat_number = torch.argmax(yhat.data, 1)
+        # yhat_number = np.packbits(torch.round(yhat.data).byte())
 
-            accuracy += (yhat_number == y).sum()
-        return loss / (i + 1), 100.0 * accuracy.cpu().item() / ntest
+        accuracy = []
+        for i in range(10):
+            j = y == i
+            accuracy.append((yhat_number[j] == y[j]).float().mean() * 100.0)
+
+        return loss, accuracy
 
     for epoch in range(epochs):
         train(model.train())
         loss, accuracy = test(model.eval())
-        if stopper.step(loss, metrics=(accuracy,), model=model):
+        if stopper.step(loss, metrics=(*accuracy,), model=model):
             break
 
 
