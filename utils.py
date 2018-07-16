@@ -6,10 +6,15 @@ import numpy as np
 
 def create_batches(dataset, batch_size=1000, shuffle=False):
     x, y = dataset[0], dataset[1]
-    nb = x.shape[0] // batch_size  # number of batches
-    assert nb % 1 == 0, 'Batch_size (%g) indivisible by dataset size (%g)' % (batch_size, x.shape[0])
     if shuffle:
         x, y = shuffle_data(x, y)
+
+    nb = x.shape[0] // batch_size  # number of batches
+    remainder = x.shape[0] % batch_size  # number of remainder samples
+    if remainder != 0:
+        print('Warning: dataset size %g indivisible by batch size %g, %g extra.' % (batch_size, x.shape[0], remainder))
+        x, y = x[:nb * batch_size], y[:nb * batch_size]  # trim off extra data
+
     x = x.view(nb, batch_size, *x.shape[1:])
     y = y.view(nb, batch_size, *y.shape[1:])
     batches = [(x[i], y[i]) for i in range(nb)]
@@ -27,9 +32,13 @@ def normalize(x, axis=None):  # normalize x mean and std by axis
 
 
 def shuffle_data(x, y):  # randomly shuffle x and y by same axis=0 indices
-    i = np.arange(x.shape[0])
-    np.random.shuffle(i)
-    return x[i], y[i]
+    # i = np.arange(x.shape[0])
+    # np.random.shuffle(i)
+    rng_state = np.random.get_state()
+    np.random.shuffle(x)
+    np.random.set_state(rng_state)
+    np.random.shuffle(y)
+    return x, y
 
 
 def split_data(x, y, train=0.7, validate=0.15, test=0.15, shuffle=False):  # split training data
