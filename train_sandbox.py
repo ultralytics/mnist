@@ -85,7 +85,7 @@ def main(model):
     printerval = 1
     patience = 200
     batch_size = 1000
-    cuda = torch.cuda.is_available()
+    cuda = False # torch.cuda.is_available()
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
 
@@ -112,33 +112,51 @@ def main(model):
     #                     {'x': test.test_data.unsqueeze(1).numpy(), 'y': test.test_labels.squeeze().numpy()})
 
     mat = scipy.io.loadmat('data/MNISTtrain.mat')
+    i = torch.nonzero((mat['y'] == 0).squeeze() | (torch.rand(mat['y'].shape[1]) > 0.9).squeeze()).long().squeeze()
+    i = i[0:11000]  # round to batch size
+    mat['x'] = mat['x'][i]
+    mat['y'] = mat['y'][0, i].reshape(1,-1)
+
     train_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long()
     train_loader2 = create_batches(dataset=train_data, batch_size=batch_size, shuffle=True)
 
     mat = scipy.io.loadmat('data/MNISTtest.mat')
-    test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long().to(device)
+    test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long()
     # test_loader2 = create_batches(dataset=test_data, batch_size=10000)
+    # ntest = len(test_data[1])
 
     model = model.to(device)
-    criteria1 = nn.CrossEntropyLoss()
+    weight = 1/torch.cuda.FloatTensor([10,1,1,1,1,1,1,1,1,1])
+    weight = weight / weight.sum()
+    criteria0 = nn.BCELoss()  # nn.NLLLoss(), nn.CrossEntropyLoss()  # nn.MSELoss()
+    criteria1 = nn.CrossEntropyLoss(weight=weight)  # nn.NLLLoss(), nn.CrossEntropyLoss()  # nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
     def train(model):
         for i, (x, y) in enumerate(train_loader2):
+            # y = torch.from_numpy(np.unpackbits(y.byte()).reshape(y.shape[0],8)).float()
             x, y = x.to(device), y.to(device)
-            loss = criteria1(model(x), y)
 
+            # yb = torch.zeros((y.shape[0], 10)).to(device)
+            # yb[range(y.shape[0]), y] = 1
+
+            yhat = model(x)  # 512x10
+            loss = criteria1(yhat, y)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
     def test(model):
         x, y = test_data
+        # yb = torch.from_numpy(np.unpackbits(y.byte()).reshape(y.shape[0],8)).float()
+        x, y = x.to(device), y.to(device)
 
         yhat = model(x)
         loss = criteria1(yhat, y)
+
         yhat_number = torch.argmax(yhat.data, 1)
+        # yhat_number = np.packbits(torch.round(yhat.data).byte())
 
         accuracy = []
         for i in range(10):
