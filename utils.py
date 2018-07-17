@@ -12,11 +12,15 @@ def create_batches(dataset, batch_size=1000, shuffle=False):
     nb = x.shape[0] // batch_size  # number of batches
     remainder = x.shape[0] % batch_size  # number of remainder samples
     if remainder != 0:
-        print('Warning: dataset size %g indivisible by batch size %g, %g extra.' % (batch_size, x.shape[0], remainder))
+        print('Warning: dataset size %g indivisible by batch size %g, %g extra.' % (x.shape[0], batch_size, remainder))
         x, y = x[:nb * batch_size], y[:nb * batch_size]  # trim off extra data
 
-    x = x.view(nb, batch_size, *x.shape[1:])
-    y = y.view(nb, batch_size, *y.shape[1:])
+    if type(x).__module__ == np.__name__:  # is numpy
+        x = x.reshape(nb, batch_size, *x.shape[1:])
+        y = y.reshape(nb, batch_size, *y.shape[1:])
+    else:  # is pytorch
+        x = x.view(nb, batch_size, *x.shape[1:])
+        y = y.view(nb, batch_size, *y.shape[1:])
     batches = [(x[i], y[i]) for i in range(nb)]
     return batches
 
@@ -32,8 +36,6 @@ def normalize(x, axis=None):  # normalize x mean and std by axis
 
 
 def shuffle_data(x, y):  # randomly shuffle x and y by same axis=0 indices
-    # i = np.arange(x.shape[0])
-    # np.random.shuffle(i)
     rng_state = np.random.get_state()
     np.random.shuffle(x)
     np.random.set_state(rng_state)
