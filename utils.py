@@ -2,12 +2,16 @@ import copy
 import time
 
 import numpy as np
+import pickle
 
 
-def create_batches(dataset, batch_size=1000, shuffle=False):
-    x, y = dataset[0], dataset[1]
+def create_batches(x, y, batch_size=1000, shuffle=False):
     if shuffle:
-        x, y = shuffle_data(x, y)
+        # shuffle_data(x, y)
+        rng_state = np.random.get_state()
+        np.random.shuffle(x)
+        np.random.set_state(rng_state)
+        np.random.shuffle(y)
 
     nb = x.shape[0] // batch_size  # number of batches
     remainder = x.shape[0] % batch_size  # number of remainder samples
@@ -35,18 +39,17 @@ def normalize(x, axis=None):  # normalize x mean and std by axis
     return (x - mu) / sigma, mu, sigma
 
 
-def shuffle_data(x, y):  # randomly shuffle x and y by same axis=0 indices
+def shuffle_data(x, y):  # randomly shuffle x and y by same axis=0 indices. no need to return values, shuffled in place
     rng_state = np.random.get_state()
     np.random.shuffle(x)
     np.random.set_state(rng_state)
     np.random.shuffle(y)
-    return x, y
 
 
 def split_data(x, y, train=0.7, validate=0.15, test=0.15, shuffle=False):  # split training data
     n = x.shape[0]
     if shuffle:
-        x, y = shuffle_data(x, y)
+        shuffle_data(x, y)
     i = round(n * train)  # train
     j = round(n * validate) + i  # validate
     k = round(n * test) + j  # test

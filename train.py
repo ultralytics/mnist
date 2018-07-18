@@ -112,8 +112,9 @@ def main(model):
     #                     {'x': test.test_data.unsqueeze(1).numpy(), 'y': test.test_labels.squeeze().numpy()})
 
     mat = scipy.io.loadmat('data/MNISTtrain.mat')
-    train_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long()
-    train_loader2 = create_batches(dataset=train_data, batch_size=batch_size, shuffle=True)
+    train_loader2 = create_batches(x=torch.Tensor(mat['x']),
+                                   y=torch.Tensor(mat['y']).squeeze().long(),
+                                   batch_size=batch_size, shuffle=True)
 
     mat = scipy.io.loadmat('data/MNISTtest.mat')
     test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long().to(device)
@@ -152,6 +153,7 @@ def main(model):
         loss, accuracy = test(model.eval())
         if stopper.step(loss, metrics=(*accuracy,), model=model):
             break
+
 
 
 if __name__ == '__main__':

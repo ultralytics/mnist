@@ -1,6 +1,7 @@
+import math
 import random
 
-import scipy.io
+import cv2
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -67,7 +68,7 @@ class ConvNeta(nn.Module):
 class ConvNetb(nn.Module):
     def __init__(self, num_classes=60):
         super(ConvNetb, self).__init__()
-        n = 48  # initial convolution size
+        n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(n),
@@ -80,13 +81,29 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 2, n * 4, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(n * 4),
             nn.ReLU())
-        #self.fc = nn.Linear(n * n * 8, num_classes)
-        self.fc = nn.Linear(27648, num_classes)  # chips48
+        # self.layer4 = nn.Sequential(
+        #     nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1),
+        #     nn.BatchNorm2d(n * 8),
+        #     nn.ReLU())
+        # self.layer5 = nn.Sequential(
+        #     nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1),
+        #     nn.BatchNorm2d(n * 16),
+        #     nn.ReLU())
+        # self.fc = nn.Linear(n * n * 8, num_classes)
+        # self.fc = nn.Linear(8192, num_classes)  # chips32+14 3layer 32n
+        # self.fc = nn.Linear(4096, num_classes)  # chips32+14 4layer 32n
+        # self.fc = nn.Linear(12800, num_classes)  # chips40+16 3layer 32n
+        self.fc = nn.Linear(18432 * 2, num_classes)  # chips48+16 3layer 64n
+        # self.fc = nn.Linear(4608, num_classes)  # chips48+16 3layer 32n
+
+
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
+        #x = self.layer4(x)
+        #x = self.layer5(x)
         x = x.reshape(x.size(0), -1)
         # x, _, _ = normalize(x,1)
         x = self.fc(x)
@@ -98,9 +115,9 @@ class ConvNetb(nn.Module):
 # @profile
 def main(model):
     lr = .001
-    epochs = 50
+    epochs = 1000
     printerval = 1
-    patience = 200
+    patience = 500
     batch_size = 1000
     cuda = torch.cuda.is_available()
     device = torch.device('cuda:0' if cuda else 'cpu')
@@ -116,24 +133,31 @@ def main(model):
     if cuda:
         torch.cuda.manual_seed(0)
         torch.cuda.manual_seed_all(0)
+        torch.backends.cudnn.benchmark = True
 
+    # load < 2GB .mat files with scipy.io
     print('loading data mat file...')
     # mat = scipy.io.loadmat('/Users/glennjocher/Documents/PyCharmProjects/yolo/utils/class_chips48.mat')
-    #X = np.ascontiguousarray(mat['X'])  # 596154x3x32x32
-    #Y = np.ascontiguousarray(mat['Y'])
+    # X = np.ascontiguousarray(mat['X'])  # 596154x3x32x32
+    # Y = np.ascontiguousarray(mat['Y'])
 
+    # load > 2GB .mat files with h5py
     import h5py
-    with h5py.File('/Users/glennjocher/Documents/PyCharmProjects/yolo/utils/class_chips48.mat') as mat:
-        X = np.ascontiguousarray(np.array(mat['X']).transpose([3,2,1,0]))
-        Y = np.ascontiguousarray(np.array(mat['Y']))
+    with h5py.File('/Users/glennjocher/Documents/PyCharmProjects/yolo/utils/class_chips48+16.mat') as mat:
+        X = mat.get('X').value
+        Y = mat.get('Y').value
 
-    # train_data = torch.FloatTensor(X), torch.LongTensor(mat['Y']).squeeze()
-    train_data = X, Y.reshape(-1)
-    del X
-    del Y
+    # # load with pickle
+    # pickle.dump({'X': X, 'Y': Y}, open('save.p', "wb"), protocol=4)
+    # with pickle.load(open('save.p', "rb")) as save:
+    #     X, Y = save['X'], save['Y']
 
-    print('creating batches...')
-    train_data = create_batches(dataset=train_data, batch_size=batch_size, shuffle=True)
+    X = np.ascontiguousarray(X)
+    Y = np.ascontiguousarray(Y.ravel())
+
+    # print('creating batches...')
+    # train_data = create_batches(x=X, y=Y, batch_size=batch_size, shuffle=True)
+    # del X, Y
 
     print('model to device...')
     model = model.to(device)
@@ -141,18 +165,48 @@ def main(model):
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
+    shape = X.shape[2:4]
+    print('training...', shape)
+
     # @profile
     def train(model):
-        nC = torch.zeros(60).to(device)  # number correct
-        nS = torch.zeros(60).long().to(device)  # number samples
+        vC = torch.zeros(60).to(device)  # vector correct
+        vS = torch.zeros(60).long().to(device)  # vecgtor samples
         loss_cum = torch.FloatTensor([0]).to(device)
-        for (x, y) in train_data:
-            if random.random() > 0.25:
-                np.rot90(x, k=np.random.choice([1, 2, 3]), axes=(2, 3))
-            if random.random() > 0.5:
-                x = x[:, :, :, ::-1]  # = np.fliplr(x)
-            if random.random() > 0.5:
-                x = x[:, :, ::-1, :]  # = np.flipud(x)
+        nS = len(Y)
+        # for (x, y) in train_data:
+        for batch in range(596):
+            i = np.random.randint(low=0, high=nS, size=batch_size)
+            x, y = X[i], Y[i]
+
+            x = x.transpose([0, 2, 3, 1])  # torch to cv2
+            M = random_affine(degrees=(-89, 89), translate=(.1, .1), scale=(.9, 1.1), shear=(-2, 2), shape=shape)
+            for j in range(batch_size):
+                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
+                                           borderValue=[60.134, 49.697, 40.746])  # RGB borderValue order
+
+            # for pi in range(16):
+            #     plt.subplot(4, 4, pi + 1).imshow(x[pi])
+            # for pi in range(16):
+            #     plt.subplot(4, 4, pi + 1).imshow(x[pi,7:32 + 7, 7:32 + 7])
+
+            x = x.transpose([0, 3, 1, 2])  # cv2 to torch
+
+            # x = x[:, :, 7:32 + 7, 7:32 + 7]
+            # x = x[:, :, 8:40 + 8, 8:40 + 8]
+            x = x[:, :, 8:48 + 8, 8:48 + 8]
+
+            # if random.random() > 0.25:
+            #     np.rot90(x, k=np.random.choice([1, 2, 3]), axes=(2, 3))
+            # if random.random() > 0.5:
+            #     x = x[:, :, :, ::-1]  # = np.fliplr(x)
+            # if random.random() > 0.5:
+            #     x = x[:, :, ::-1, :]  # = np.flipud(x)
+
+            # 596154x3x64x64
+            # x_shift = int(np.clip(random.gauss(8, 3), a_min=0, a_max=16) + 0.5)
+            # y_shift = int(np.clip(random.gauss(8, 3), a_min=0, a_max=16) + 0.5)
+            # x = x[:, :, y_shift:y_shift + 48, x_shift:x_shift + 48]
 
             x = np.ascontiguousarray(x)
             x = torch.from_numpy(x).to(device).float()
@@ -171,22 +225,104 @@ def main(model):
             with torch.no_grad():
                 loss_cum += loss.data
                 correct = y == torch.argmax(yhat.data, 1)
-                nS += torch.bincount(y, minlength=60)
-                nC += torch.bincount(y, minlength=60, weights=correct).float()
+                vS += torch.bincount(y, minlength=60)
+                vC += torch.bincount(y, minlength=60, weights=correct).float()
 
-        accuracy = nC / nS.float()
+        accuracy = vC / vS.float()
         return loss_cum.detach().cpu(), accuracy.detach().cpu()
 
+    best_loss = float('inf')
     for epoch in range(epochs):
         loss, accuracy = train(model.train())
+
+        if (epoch >= 0) & (loss.item() < best_loss):
+            best_loss = loss.item()
+            torch.save(model.state_dict(), 'chips.pt')
+
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
 
-    print(accuracy)
+
+def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=(-2, 2), shape=(0, 0)):
+    # torchvision.transforms.RandomAffine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=(-10, 10))
+    # https://medium.com/uruvideo/dataset-augmentation-with-random-homographies-a8f4b44830d4
+
+    # Rotation and Scale
+    R = np.eye(3)
+    a = random.random() * (degrees[1] - degrees[0]) + degrees[0]
+    a += random.choice([-180, -90, 0, 90])  # random 90deg rotations added to small rotations
+
+    s = random.random() * (scale[1] - scale[0]) + scale[0]
+    R[:2] = cv2.getRotationMatrix2D(angle=a, center=(shape[0] / 2, shape[1] / 2), scale=s)
+
+    # Translation
+    T = np.eye(3)
+    T[0, 2] = (random.random() * 2 - 1) * translate[0] * shape[0]  # x translation (pixels)
+    T[1, 2] = (random.random() * 2 - 1) * translate[1] * shape[1]  # y translation (pixels)
+
+    # Shear
+    S = np.eye(3)
+    S[0, 1] = math.tan((random.random() * (shear[1] - shear[0]) + shear[0]) * math.pi / 180)  # x shear (deg)
+    S[1, 0] = math.tan((random.random() * (shear[1] - shear[0]) + shear[0]) * math.pi / 180)  # y shear (deg)
+
+    M = R @ T @ S
+    return M
 
 
 if __name__ == '__main__':
     main(ConvNetb())
+
+# 46 3layer 32n
+# ﻿14 layers, 585276 parameters, 585276 gradients
+#        epoch        time        loss   metric(s)
+#            0      56.311        2062     0.13002
+#            1      50.566      1753.9     0.22344
+#            2      50.651      1626.5     0.27488
+#            3      50.375      1531.5     0.31341
+#            4       50.17      1485.3     0.32498
+#            5      50.143      1439.5     0.35106
+#            6      49.461      1390.4      0.3626
+#            7      48.164      1356.6     0.38024
+#            8      50.116      1311.9     0.39458
+#            9      50.105        1287     0.40788
+
+# 64 3layer 32n
+# 14 layers, 1.19968e+06 parameters, 1.19968e+06 gradients
+#        epoch        time        loss   metric(s)
+#            0      112.31      2069.3     0.13801
+#            1      101.42      1703.3     0.23556
+#            2      98.379      1580.4     0.29431
+#            3      94.615      1489.7     0.32182
+#            4      94.348      1451.7     0.33702
+#            5      94.186        1408     0.35843
+#            6      94.337      1345.2     0.37453
+#            7      94.552      1314.4     0.39064
+#            8      94.547      1281.4     0.40956
+#            9       94.64      1249.2     0.42411
+
+# 64 3layer 64n
+# 14 layers, 2.58361e+06 parameters, 2.58361e+06 gradients
+#        epoch        time        loss   metric(s)
+#            0      151.47      2227.2     0.12849
+#            1      138.06      1714.7     0.24045
+#            2      137.25      1571.3     0.29142
+#            3      137.39      1482.8     0.32846
+#            4      139.43      1436.2     0.34547
+#            5      139.55      1383.7     0.36446
+#            6       140.1      1316.7      0.3892
+#            7      139.44      1284.8     0.40241
+
+# 64 4layer 16n
+#            0      83.699      2041.6     0.13639
+#            1       80.72      1744.9     0.22675
+#            2      81.325      1620.5     0.27641
+#            3      80.172      1543.8     0.29958
+#            4      80.119      1498.4     0.32014
+#            5      79.339      1459.3     0.34453
+#            6      79.586      1418.1     0.35016
+#            7      79.298      1389.8     0.36621
+#            8      77.316        1353     0.37321
+#            9       73.95      1323.8     0.38569
 
 #                            name  gradient   parameters shape
 #    0            layer1.0.weight      True          864 [32, 3, 3, 3]

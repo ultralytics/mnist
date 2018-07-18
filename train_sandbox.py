@@ -117,8 +117,10 @@ def main(model):
     mat['x'] = mat['x'][i]
     mat['y'] = mat['y'][0, i].reshape(1,-1)
 
-    train_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long()
-    train_loader2 = create_batches(dataset=train_data, batch_size=batch_size, shuffle=True)
+    train_loader2 = create_batches(x=torch.Tensor(mat['x']),
+                                   y=torch.Tensor(mat['y']).squeeze().long(),
+                                   batch_size=batch_size, shuffle=True)
+
 
     mat = scipy.io.loadmat('data/MNISTtest.mat')
     test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long()
