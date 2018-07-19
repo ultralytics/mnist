@@ -96,14 +96,12 @@ class ConvNetb(nn.Module):
         self.fc = nn.Linear(18432 * 2, num_classes)  # chips48+16 3layer 64n
         # self.fc = nn.Linear(4608, num_classes)  # chips48+16 3layer 32n
 
-
-
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
-        #x = self.layer4(x)
-        #x = self.layer5(x)
+        # x = self.layer4(x)
+        # x = self.layer5(x)
         x = x.reshape(x.size(0), -1)
         # x, _, _ = normalize(x,1)
         x = self.fc(x)
