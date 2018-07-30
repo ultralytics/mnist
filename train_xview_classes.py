@@ -105,7 +105,7 @@ class ConvNetb(nn.Module):
         x = x.reshape(x.size(0), -1)
         # x, _, _ = normalize(x,1)
         x = self.fc(x)
-        # x = F.sigmoid(x)
+        # x = torch.sigmoid(x)
         # x = F.log_softmax(x, dim=1)  # ONLY for use with nn.NLLLoss
         return x
 
@@ -121,8 +121,6 @@ def main(model):
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
 
-    # rgb_mean = np.array([60.134, 49.697, 40.746], dtype=np.float32).reshape((1, 3, 1, 1))
-    # rgb_std = np.array([29.99, 24.498, 22.046], dtype=np.float32).reshape((1, 3, 1, 1))
     rgb_mean = torch.FloatTensor([60.134, 49.697, 40.746]).view((1, 3, 1, 1)).to(device)
     rgb_std = torch.FloatTensor([29.99, 24.498, 22.046]).view((1, 3, 1, 1)).to(device)
 
@@ -159,47 +157,50 @@ def main(model):
 
     print('model to device...')
     model = model.to(device)
-    criteria1 = nn.CrossEntropyLoss(weight=xview_class_weights(range(60)).to(device))
+    criteria = nn.CrossEntropyLoss(weight=xview_class_weights(range(60)).to(device))
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
+    border = 8
     shape = X.shape[2:4]
+    height = shape[0]
     print('training...', shape)
-
-    # @profile
     def train(model):
         vC = torch.zeros(60).to(device)  # vector correct
         vS = torch.zeros(60).long().to(device)  # vecgtor samples
         loss_cum = torch.FloatTensor([0]).to(device)
         nS = len(Y)
         # for (x, y) in train_data:
+        v = np.random.permutation(nS)
         for batch in range(596):
-            i = np.random.randint(low=0, high=nS, size=batch_size)
+            i = v[batch*batch_size:(batch+1)*batch_size]
             x, y = X[i], Y[i]
 
             x = x.transpose([0, 2, 3, 1])  # torch to cv2
-            M = random_affine(degrees=(-89, 89), translate=(.1, .1), scale=(.9, 1.1), shear=(-2, 2), shape=shape)
             for j in range(batch_size):
-                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
-                                           borderValue=[60.134, 49.697, 40.746])  # RGB borderValue order
 
-            # for pi in range(16):
-            #     plt.subplot(4, 4, pi + 1).imshow(x[pi])
-            # for pi in range(16):
-            #     plt.subplot(4, 4, pi + 1).imshow(x[pi,7:32 + 7, 7:32 + 7])
+                M = random_affine(degrees=(-179, 179), translate=(.20, .20), scale=(.8, 1.2), shear=(-2, 2),
+                                  shape=shape)
+
+                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_AREA,
+                                           borderValue=[60.134, 49.697, 40.746])  # RGB
+
+            import matplotlib.pyplot as plt
+            for pi in range(16):
+                plt.subplot(4, 4, pi + 1).imshow(x[pi])
+            for pi in range(16):
+                plt.subplot(4, 4, pi + 1).imshow(x[pi,border:height-border, border:height-border])
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
-            # x = x[:, :, 7:32 + 7, 7:32 + 7]
-            # x = x[:, :, 8:40 + 8, 8:40 + 8]
-            x = x[:, :, 8:48 + 8, 8:48 + 8]
+            x = x[:, :, border:height-border, border:height-border]
 
             # if random.random() > 0.25:
             #     np.rot90(x, k=np.random.choice([1, 2, 3]), axes=(2, 3))
             # if random.random() > 0.5:
             #     x = x[:, :, :, ::-1]  # = np.fliplr(x)
-            # if random.random() > 0.5:
-            #     x = x[:, :, ::-1, :]  # = np.flipud(x)
+            if random.random() > 0.5:
+                x = x[:, :, ::-1, :]  # = np.flipud(x)
 
             # 596154x3x64x64
             # x_shift = int(np.clip(random.gauss(8, 3), a_min=0, a_max=16) + 0.5)
@@ -214,7 +215,7 @@ def main(model):
             x /= rgb_std
 
             yhat = model(x)
-            loss = criteria1(yhat, y)
+            loss = criteria(yhat, y)
 
             optimizer.zero_grad()
             loss.backward()
@@ -248,10 +249,11 @@ def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=
     # Rotation and Scale
     R = np.eye(3)
     a = random.random() * (degrees[1] - degrees[0]) + degrees[0]
-    a += random.choice([-180, -90, 0, 90])  # random 90deg rotations added to small rotations
+    # a += random.choice([-180, -90, 0, 90])  # random 90deg rotations added to small rotations
 
     s = random.random() * (scale[1] - scale[0]) + scale[0]
-    R[:2] = cv2.getRotationMatrix2D(angle=a, center=(shape[0] / 2, shape[1] / 2), scale=s)
+    R[:2] = cv2.getRotationMatrix2D(angle=a, center=(shape[1] / 2, shape[0] / 2), scale=s)
+
 
     # Translation
     T = np.eye(3)
@@ -263,7 +265,7 @@ def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=
     S[0, 1] = math.tan((random.random() * (shear[1] - shear[0]) + shear[0]) * math.pi / 180)  # x shear (deg)
     S[1, 0] = math.tan((random.random() * (shear[1] - shear[0]) + shear[0]) * math.pi / 180)  # y shear (deg)
 
-    M = R @ T @ S
+    M = S @ T @ R  # ORDER IS IMPORTANT HERE!!
     return M
 
 
