@@ -91,7 +91,7 @@ class ConvNetb(nn.Module):
         #     nn.ReLU())
         # self.fc = nn.Linear(65536, num_classes)  # 64 pixels, 3 layer, 64 filters
         # self.fc = nn.Linear(32768, num_classes)  # 64 pixels, 3 layer, 32 filters
-        self.fc = nn.Linear(32768, num_classes)  # 64 pixels, 4 layer, 64 filters
+        self.fc = nn.Linear(int(32768), num_classes)  # 64 pixels, 4 layer, 64 filters
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
         x = self.layer1(x)
@@ -155,9 +155,10 @@ def main(model):
     start_epoch = 0
     best_loss = float('inf')
     if resume:
-        checkpoint = torch.load('best.pt', map_location='cuda:0' if cuda else 'cpu')
+        checkpoint = torch.load('best64_4layer.pt', map_location='cuda:0' if cuda else 'cpu')
 
         model.load_state_dict(checkpoint['model'])
+        model = model.to(device).train()
 
         # Set optimizer
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
@@ -167,9 +168,9 @@ def main(model):
         best_loss = checkpoint['best_loss']
         del checkpoint
     else:
+        model = model.to(device).train()
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    model = model.to(device).train()
     weights = xview_class_weights(range(60))[Y].numpy()
     weights /= weights.sum()
     criteria = nn.CrossEntropyLoss()  # (weight=xview_class_weights(range(60)).to(device))
@@ -193,7 +194,7 @@ def main(model):
 
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
             for j in range(batch_size):
-                M = random_affine(degrees=(-179, 179), translate=(.1, .1), scale=(.85, 1.15), shear=(-2, 2),
+                M = random_affine(degrees=(-179, 179), translate=(.02, .02), scale=(.95, 1.05), shear=(-2, 2),
                                   shape=shape)
 
                 x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
@@ -256,7 +257,7 @@ def main(model):
                         'accuracy': accuracy,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
-                       'best64_4layer.pt')
+                       'best64_4layer3.pt')
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
@@ -320,25 +321,25 @@ if __name__ == '__main__':
 # 64+64 chips, 4 layer, 64 filter, 1e-4 lr, weighted choice
 # 18 layers, 3.51904e+06 parameters, 3.51904e+06 gradients
 #        epoch        time        loss   metric(s)
-#            0       72.43      744.75     0.23078
-#            1      76.317       597.1     0.35176
-#            2      69.936      543.78     0.40263
-#            3      68.197       504.7     0.43963
-#            4      69.056      475.06     0.46616
-#            5      72.852      455.73     0.48609
-#            6      69.214       436.1     0.50529
-#            7      67.793      421.49     0.51934
-#            8      67.079      406.48     0.53477
-#            9      73.498      397.14     0.54414
-#           10       68.31      385.07     0.55675
-#           11      67.787      375.28     0.56684
-#           12      67.081      367.78     0.57516
-#           13      66.954      360.69     0.58117
-#           14      66.217      350.45     0.59205
-#           15      65.927      344.84     0.59762
-#           16      65.636      337.16      0.6074
-#           17      65.761      332.72     0.61255
-#           18      66.165      325.87     0.61609
-#           19      69.363       321.9     0.62207
-#           20       72.75       316.5     0.62994
-#           21      72.562      312.92     0.63243
+#            0      71.674      723.36     0.24818
+#            1      68.146      578.31     0.36916
+#            2      67.065      526.51     0.41884
+#            3      65.809      489.59     0.45376
+#            4      65.459       463.5     0.47846
+#            5       66.26      444.56     0.49885
+#            6      65.697       427.5     0.51586
+#            7      66.678      411.46     0.52993
+#            8      69.236      398.99     0.54557
+#            9      67.304       387.8     0.55529
+#           10       67.04      379.64     0.56469
+#           11      68.929      366.64     0.57563
+#           12      67.943      361.51     0.58113
+#           13      67.129      351.83      0.5916
+#           14      67.819      343.37     0.60065
+#           15      66.663      336.71     0.60816
+#           16      67.298      331.21     0.61232
+#           17      66.624      327.19     0.61792
+#           18      67.563      320.75     0.62496
+#           19      66.685      314.04     0.63251
+#           20      66.962      309.61     0.63594
+#           21      69.335      306.29      0.6382
