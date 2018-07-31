@@ -17,9 +17,9 @@ np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format}) 
 
 def xview_class_weights(indices):  # weights of each class in the training set, normalized to mu = 1
     weights = 1 / torch.FloatTensor(
-        [74, 364, 713, 71, 2925, 209767, 6925, 1101, 3612, 12134, 5871, 3640, 860, 4062, 895, 149, 174, 17, 1624, 1846,
+        [74, 364, 713, 71, 2925, 20976.7, 6925, 1101, 3612, 12134, 5871, 3640, 860, 4062, 895, 149, 174, 17, 1624, 1846,
          125, 122, 124, 662, 1452, 697, 222, 190, 786, 200, 450, 295, 79, 205, 156, 181, 70, 64, 337, 1352, 336, 78,
-         628, 841, 287, 83, 702, 1177, 313865, 195, 1081, 882, 1059, 4175, 123, 1700, 2317, 1579, 368, 85])
+         628, 841, 287, 83, 702, 1177, 31386.5, 195, 1081, 882, 1059, 4175, 123, 1700, 2317, 1579, 368, 85])
     weights /= weights.sum()
     return weights[indices]
 
@@ -68,7 +68,7 @@ class ConvNeta(nn.Module):
 class ConvNetb(nn.Module):
     def __init__(self, num_classes=60):
         super(ConvNetb, self).__init__()
-        n = 64  # initial convolution size
+        n = 32  # initial convolution size
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(n),
@@ -93,8 +93,10 @@ class ConvNetb(nn.Module):
         # self.fc = nn.Linear(8192, num_classes)  # chips32+14 3layer 32n
         # self.fc = nn.Linear(4096, num_classes)  # chips32+14 4layer 32n
         # self.fc = nn.Linear(12800, num_classes)  # chips40+16 3layer 32n
-        self.fc = nn.Linear(18432 * 2, num_classes)  # chips48+16 3layer 64n
+        # self.fc = nn.Linear(18432 * 2, num_classes)  # chips48+16 3layer 64n
         # self.fc = nn.Linear(4608, num_classes)  # chips48+16 3layer 32n
+        # self.fc = nn.Linear(65536, num_classes)  # 64+36, 3layer 64n
+        self.fc = nn.Linear(32768, num_classes)  # 64+36, 3layer 32n
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
         x = self.layer1(x)
@@ -112,11 +114,11 @@ class ConvNetb(nn.Module):
 
 # @profile
 def main(model):
-    lr = .001
+    lr = .0001
     epochs = 1000
     printerval = 1
     patience = 500
-    batch_size = 1000
+    batch_size = 500
     cuda = torch.cuda.is_available()
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
@@ -139,7 +141,7 @@ def main(model):
 
     # load > 2GB .mat files with h5py
     import h5py
-    with h5py.File('/Users/glennjocher/Documents/PyCharmProjects/yolo/utils/class_chips48+16.mat') as mat:
+    with h5py.File('/Users/glennjocher/Documents/PyCharmProjects/yolo/utils/class_chips64+64.mat') as mat:
         X = mat.get('X').value
         Y = mat.get('Y').value
 
@@ -155,45 +157,64 @@ def main(model):
     # train_data = create_batches(x=X, y=Y, batch_size=batch_size, shuffle=True)
     # del X, Y
 
-    print('model to device...')
-    model = model.to(device)
-    criteria = nn.CrossEntropyLoss(weight=xview_class_weights(range(60)).to(device))
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # Load saved model
+    resume = False
+    start_epoch = 0
+    best_loss = float('inf')
+    if resume:
+        checkpoint = torch.load('best.pt', map_location='cuda:0' if cuda else 'cpu')
+
+        model.load_state_dict(checkpoint['model'])
+
+        # Set optimizer
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
+        optimizer.load_state_dict(checkpoint['optimizer'])
+
+        start_epoch = checkpoint['epoch'] + 1
+        best_loss = checkpoint['best_loss']
+        del checkpoint
+    else:
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+    model = model.to(device).train()
+    weights = xview_class_weights(range(60))[Y].numpy()
+    weights /= weights.sum()
+    criteria = nn.CrossEntropyLoss()  # (weight=xview_class_weights(range(60)).to(device))
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
-    border = 8
-    shape = X.shape[2:4]
+    border = 32
+    shape = X.shape[1:3]
     height = shape[0]
     print('training...', shape)
+
     def train(model):
         vC = torch.zeros(60).to(device)  # vector correct
         vS = torch.zeros(60).long().to(device)  # vecgtor samples
         loss_cum = torch.FloatTensor([0]).to(device)
         nS = len(Y)
-        # for (x, y) in train_data:
         v = np.random.permutation(nS)
-        for batch in range(596):
-            i = v[batch*batch_size:(batch+1)*batch_size]
+        for batch in range(int(nS / batch_size)):
+            # i = v[batch * batch_size:(batch + 1) * batch_size]  # ordered chip selection
+            i = np.random.choice(nS, size=batch_size, p=weights)  # weighted chip selection
             x, y = X[i], Y[i]
 
-            x = x.transpose([0, 2, 3, 1])  # torch to cv2
+            # x = x.transpose([0, 2, 3, 1])  # torch to cv2
             for j in range(batch_size):
-
-                M = random_affine(degrees=(-179, 179), translate=(.20, .20), scale=(.8, 1.2), shear=(-2, 2),
+                M = random_affine(degrees=(-179, 179), translate=(.1, .1), scale=(.85, 1.20), shear=(-2, 2),
                                   shape=shape)
 
                 x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_AREA,
                                            borderValue=[60.134, 49.697, 40.746])  # RGB
 
-            import matplotlib.pyplot as plt
-            for pi in range(16):
-                plt.subplot(4, 4, pi + 1).imshow(x[pi])
-            for pi in range(16):
-                plt.subplot(4, 4, pi + 1).imshow(x[pi,border:height-border, border:height-border])
+            # import matplotlib.pyplot as plt
+            # for pi in range(16):
+            #     plt.subplot(4, 4, pi + 1).imshow(x[pi])
+            # for pi in range(16):
+            #    plt.subplot(4, 4, pi + 1).imshow(x[pi + 100, border:height - border, border:height - border])
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
-            x = x[:, :, border:height-border, border:height-border]
+            x = x[:, :, border:height - border, border:height - border]
 
             # if random.random() > 0.25:
             #     np.rot90(x, k=np.random.choice([1, 2, 3]), axes=(2, 3))
@@ -230,13 +251,19 @@ def main(model):
         accuracy = vC / vS.float()
         return loss_cum.detach().cpu(), accuracy.detach().cpu()
 
-    best_loss = float('inf')
     for epoch in range(epochs):
+        epoch += start_epoch
         loss, accuracy = train(model.train())
 
+        # Save best checkpoint
         if (epoch >= 0) & (loss.item() < best_loss):
             best_loss = loss.item()
-            torch.save(model.state_dict(), 'chips.pt')
+            torch.save({'epoch': epoch,
+                        'best_loss': best_loss,
+                        'accuracy': accuracy,
+                        'model': model.state_dict(),
+                        'optimizer': optimizer.state_dict()},
+                       'best.pt')
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
@@ -253,7 +280,6 @@ def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=
 
     s = random.random() * (scale[1] - scale[0]) + scale[0]
     R[:2] = cv2.getRotationMatrix2D(angle=a, center=(shape[1] / 2, shape[0] / 2), scale=s)
-
 
     # Translation
     T = np.eye(3)
@@ -311,6 +337,22 @@ if __name__ == '__main__':
 #            5      139.55      1383.7     0.36446
 #            6       140.1      1316.7      0.3892
 #            7      139.44      1284.8     0.40241
+# updated lr 0.001 bs 1000
+# 14 layers, 2.58361e+06 parameters, 2.58361e+06 gradients
+#        epoch        time        loss   metric(s)
+#            0      150.14        2111     0.12251  0.0001 lr
+#            0      150.72      2399.9    0.089126
+#            1      143.15      1896.3     0.17328
+#            2       144.2      1757.8     0.22221
+#            3      144.11      1678.7     0.24831
+#            4      142.85      1615.2     0.28278
+#            5      142.18      1558.4     0.29893
+#            6       142.2      1524.2     0.31689
+#            7       142.2      1484.6     0.32971
+#            8      142.05      1448.5     0.34189
+#            9      141.92      1417.2     0.35459
+#           10      144.75      1388.6     0.36825
+
 
 # 64 4layer 16n
 #            0      83.699      2041.6     0.13639

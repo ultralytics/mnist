@@ -81,11 +81,11 @@ class ConvNetb(nn.Module):
 
 def main(model):
     lr = .001
-    epochs = 10
+    epochs = 30
     printerval = 1
     patience = 200
     batch_size = 1000
-    cuda = False # torch.cuda.is_available()
+    cuda = torch.cuda.is_available()
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
 
@@ -170,6 +170,7 @@ def main(model):
     for epoch in range(epochs):
         train(model.train())
         loss, accuracy = test(model.eval())
+        print(np.array(accuracy).mean())
         if stopper.step(loss, metrics=(*accuracy,), model=model):
             break
 
