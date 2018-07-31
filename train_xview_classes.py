@@ -81,28 +81,23 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 2, n * 4, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(n * 4),
             nn.ReLU())
-        # self.layer4 = nn.Sequential(
-        #     nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1),
-        #     nn.BatchNorm2d(n * 8),
-        #     nn.ReLU())
+        self.layer4 = nn.Sequential(
+            nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1),
+            nn.BatchNorm2d(n * 8),
+            nn.ReLU())
         # self.layer5 = nn.Sequential(
         #     nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1),
         #     nn.BatchNorm2d(n * 16),
         #     nn.ReLU())
-        # self.fc = nn.Linear(n * n * 8, num_classes)
-        # self.fc = nn.Linear(8192, num_classes)  # chips32+14 3layer 32n
-        # self.fc = nn.Linear(4096, num_classes)  # chips32+14 4layer 32n
-        # self.fc = nn.Linear(12800, num_classes)  # chips40+16 3layer 32n
-        # self.fc = nn.Linear(18432 * 2, num_classes)  # chips48+16 3layer 64n
-        # self.fc = nn.Linear(4608, num_classes)  # chips48+16 3layer 32n
-        self.fc = nn.Linear(65536, num_classes)  # 64+36, 3layer 64n
-        # self.fc = nn.Linear(32768, num_classes)  # 64+36, 3layer 32n
+        # self.fc = nn.Linear(65536, num_classes)  # 64 pixels, 3 layer, 64 filters
+        # self.fc = nn.Linear(32768, num_classes)  # 64 pixels, 3 layer, 32 filters
+        self.fc = nn.Linear(32768, num_classes)  # 64 pixels, 4 layer, 64 filters
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
-        # x = self.layer4(x)
+        x = self.layer4(x)
         # x = self.layer5(x)
         x = x.reshape(x.size(0), -1)
         # x, _, _ = normalize(x,1)
@@ -132,14 +127,14 @@ def main(model):
         torch.backends.cudnn.benchmark = True
 
     # load < 2GB .mat files with scipy.io
-    print('loading data mat file...')
+    print('loading data...')
     # mat = scipy.io.loadmat('/Users/glennjocher/Documents/PyCharmProjects/yolo/utils/class_chips48.mat')
     # X = np.ascontiguousarray(mat['X'])  # 596154x3x32x32
     # Y = np.ascontiguousarray(mat['Y'])
 
     # load > 2GB .mat files with h5py
     import h5py
-    with h5py.File('/Users/glennjocher/Documents/PyCharmProjects/yolo/utils/class_chips64+64.mat') as mat:
+    with h5py.File('/Users/glennjocher/Documents/PyCharmProjects/yolo/class_chips64+64_tight.h5') as mat:
         X = mat.get('X').value
         Y = mat.get('Y').value
 
@@ -198,17 +193,17 @@ def main(model):
 
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
             for j in range(batch_size):
-                M = random_affine(degrees=(-179, 179), translate=(.1, .1), scale=(.85, 1.20), shear=(-2, 2),
+                M = random_affine(degrees=(-179, 179), translate=(.1, .1), scale=(.85, 1.15), shear=(-2, 2),
                                   shape=shape)
 
-                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_AREA,
+                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
                                            borderValue=[60.134, 49.697, 40.746])  # RGB
 
             # import matplotlib.pyplot as plt
             # for pi in range(16):
-            #     plt.subplot(4, 4, pi + 1).imshow(x[pi])
+            #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50])
             # for pi in range(16):
-            #    plt.subplot(4, 4, pi + 1).imshow(x[pi + 100, border:height - border, border:height - border])
+            #    plt.subplot(4, 4, pi + 1).imshow(x[pi + 50, border:height - border, border:height - border])
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
@@ -261,7 +256,7 @@ def main(model):
                         'accuracy': accuracy,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
-                       'best64.pt')
+                       'best64_4layer.pt')
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
@@ -307,3 +302,43 @@ if __name__ == '__main__':
 #            5      56.764      513.21     0.43129
 #            6      56.875      498.57      0.4469
 #            7      56.738      488.15     0.45739
+#            8      57.036      475.83     0.46783
+#            9      55.792      467.88     0.47626
+#           10      56.208      458.48     0.48439
+#           11      56.211      450.75     0.49385
+#           12      57.053      445.68     0.49811
+#           13      57.328      441.04     0.50464
+#           14      56.918      431.16     0.51161
+#           15      57.427      426.65     0.51633
+#           16      57.459      419.86     0.52306
+#           17      57.065      417.16     0.52744
+#           18      56.941      412.04     0.52933
+#           19      57.092       408.4     0.53467
+#           20      56.203      405.08     0.53933
+#           21      56.807      401.29     0.54273
+
+# 64+64 chips, 4 layer, 64 filter, 1e-4 lr, weighted choice
+# 18 layers, 3.51904e+06 parameters, 3.51904e+06 gradients
+#        epoch        time        loss   metric(s)
+#            0       72.43      744.75     0.23078
+#            1      76.317       597.1     0.35176
+#            2      69.936      543.78     0.40263
+#            3      68.197       504.7     0.43963
+#            4      69.056      475.06     0.46616
+#            5      72.852      455.73     0.48609
+#            6      69.214       436.1     0.50529
+#            7      67.793      421.49     0.51934
+#            8      67.079      406.48     0.53477
+#            9      73.498      397.14     0.54414
+#           10       68.31      385.07     0.55675
+#           11      67.787      375.28     0.56684
+#           12      67.081      367.78     0.57516
+#           13      66.954      360.69     0.58117
+#           14      66.217      350.45     0.59205
+#           15      65.927      344.84     0.59762
+#           16      65.636      337.16      0.6074
+#           17      65.761      332.72     0.61255
+#           18      66.165      325.87     0.61609
+#           19      69.363       321.9     0.62207
+#           20       72.75       316.5     0.62994
+#           21      72.562      312.92     0.63243
