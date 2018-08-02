@@ -85,20 +85,25 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(n * 8),
             nn.ReLU())
-        # self.layer5 = nn.Sequential(
-        #     nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1),
-        #     nn.BatchNorm2d(n * 16),
-        #     nn.ReLU())
+        self.layer5 = nn.Sequential(
+            nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1),
+            nn.BatchNorm2d(n * 16),
+            nn.ReLU())
+        self.layer6 = nn.Sequential(
+            nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1),
+            nn.BatchNorm2d(n * 32),
+            nn.ReLU())
         # self.fc = nn.Linear(65536, num_classes)  # 64 pixels, 3 layer, 64 filters
         # self.fc = nn.Linear(32768, num_classes)  # 64 pixels, 3 layer, 32 filters
-        self.fc = nn.Linear(int(32768), num_classes)  # 64 pixels, 4 layer, 64 filters
+        self.fc = nn.Linear(int(32768/4), num_classes)  # 64 pixels, 4 layer, 64 filters
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-        # x = self.layer5(x)
+        x = self.layer5(x)
+        x = self.layer6(x)
         x = x.reshape(x.size(0), -1)
         # x, _, _ = normalize(x,1)
         x = self.fc(x)
@@ -155,7 +160,7 @@ def main(model):
     start_epoch = 0
     best_loss = float('inf')
     if resume:
-        checkpoint = torch.load('best64_4layer.pt', map_location='cuda:0' if cuda else 'cpu')
+        checkpoint = torch.load('best64_....pt', map_location='cuda:0' if cuda else 'cpu')
 
         model.load_state_dict(checkpoint['model'])
         model = model.to(device).train()
@@ -173,7 +178,7 @@ def main(model):
 
     weights = xview_class_weights(range(60))[Y].numpy()
     weights /= weights.sum()
-    criteria = nn.CrossEntropyLoss()  # (weight=xview_class_weights(range(60)).to(device))
+    criteria = nn.CrossEntropyLoss()  # weight=xview_class_weights(range(60)).to(device))
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
     border = 32
@@ -194,7 +199,7 @@ def main(model):
 
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
             for j in range(batch_size):
-                M = random_affine(degrees=(-179, 179), translate=(.02, .02), scale=(.95, 1.05), shear=(-2, 2),
+                M = random_affine(degrees=(-179, 179), translate=(.1, .1), scale=(.8, 1.20), shear=(-2, 2),
                                   shape=shape)
 
                 x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
@@ -257,7 +262,7 @@ def main(model):
                         'accuracy': accuracy,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
-                       'best64_4layer3.pt')
+                       'best64_6layer.pt')
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
@@ -343,3 +348,55 @@ if __name__ == '__main__':
 #           19      66.685      314.04     0.63251
 #           20      66.962      309.61     0.63594
 #           21      69.335      306.29      0.6382
+
+# 64+64 chips, 5 layer, 64 filter, 1e-4 lr, weighted choice
+# 22 layers, 7.25766e+06 parameters, 7.25766e+06 gradients
+#        epoch        time        loss   metric(s)
+#            0      82.027      716.17     0.25299
+#            1       78.31      553.02     0.39201
+#            2       77.94      494.01     0.44724
+#            3      77.881      453.51     0.48681
+#            4      78.541      422.42     0.51708
+#            5      78.871      399.53      0.5412
+#            6      79.004      380.04     0.56051
+#            7      79.195      363.01      0.5776
+#            8      79.192      348.36     0.59654
+#            9      78.873       334.8     0.60685
+#           10      78.701      325.81     0.62028
+#           11      78.211      309.74     0.63352
+#           12      78.383      304.03     0.64136
+#           13      78.598      294.14      0.6517
+#           14      78.995      284.86      0.6618
+#           15      78.926      279.32     0.66773
+#           16      79.018      272.16     0.67526
+#           17      78.783       265.8     0.68253
+#           18      79.131      258.86     0.69176
+#           19      79.578      252.74     0.69823
+#           20      79.602      248.09     0.70239
+#           21      79.201      242.78     0.70802
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice
+# 26 layers, 2.56467e+07 parameters, 2.56467e+07 gradients
+#        epoch        time        loss   metric(s)
+#            0      116.64      690.71     0.27556
+#            1      112.58      519.11     0.42209
+#            2      112.61      453.07      0.4859
+#            3      111.94      405.52     0.53345
+#            4      111.77       371.4      0.5683
+#            5      111.45      346.25     0.59423
+#            6      111.64      324.47     0.61758
+#            7      111.63      303.77     0.63987
+#            8      112.08      288.21     0.65884
+#            9      112.17      275.39     0.67283
+#           10      112.29      266.28     0.68319
+#           11      111.44      251.77     0.69664
+#           12      112.42      243.59     0.70702
+#           13      112.55      234.84      0.7162
+#           14      115.51      228.32     0.72272
+#           15      115.35      219.51     0.73424
+#           16      114.25       212.6     0.74147
+#           17      111.66      208.52     0.74727
+#           18      110.97       199.9     0.75598
+#           19      111.33      196.14     0.76011
+#           20      111.66      190.75     0.76805
+#           21      111.73      184.98     0.77273
