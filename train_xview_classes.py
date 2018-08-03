@@ -173,7 +173,14 @@ def main(model):
         best_loss = checkpoint['best_loss']
         del checkpoint
     else:
-        model = model.to(device).train()
+        nGPU = torch.cuda.device_count()
+        print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
+        if nGPU > 1:
+            print('%g GPUs found.' % nGPU)
+            model = nn.DataParallel(model).to(device).train()
+        else:
+            model = model.to(device).train()
+
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     weights = xview_class_weights(range(60))[Y].numpy()
