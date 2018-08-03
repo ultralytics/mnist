@@ -191,6 +191,7 @@ def main(model):
     border = 32
     shape = X.shape[1:3]
     height = shape[0]
+
     # modelinfo(model)
 
     def train(model):
@@ -299,6 +300,13 @@ def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=
 
     M = S @ T @ R  # ORDER IS IMPORTANT HERE!!
     return M
+
+
+def stripOptimizer():
+    import torch
+    a = torch.load('best64_6layerLeaky.pt', map_location='cpu')
+    a['optimizer'] = []
+    torch.save(a, '6leaky573.pt')
 
 
 if __name__ == '__main__':
