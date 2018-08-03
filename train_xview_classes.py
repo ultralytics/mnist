@@ -95,7 +95,7 @@ class ConvNetb(nn.Module):
             nn.LeakyReLU())
         # self.fc = nn.Linear(65536, num_classes)  # 64 pixels, 3 layer, 64 filters
         # self.fc = nn.Linear(32768, num_classes)  # 64 pixels, 3 layer, 32 filters
-        self.fc = nn.Linear(int(32768/4), num_classes)  # 64 pixels, 4 layer, 64 filters
+        self.fc = nn.Linear(int(32768 / 4), num_classes)  # 64 pixels, 4 layer, 64 filters
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
         x = self.layer1(x)
@@ -400,3 +400,29 @@ if __name__ == '__main__':
 #           19      111.33      196.14     0.76011
 #           20      111.66      190.75     0.76805
 #           21      111.73      184.98     0.77273
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu
+# 20 layers, 2.56426e+07 parameters, 2.56426e+07 gradients
+#        epoch        time        loss   metric(s)
+#            0      112.74      743.18     0.22663
+#            1      107.21      587.75     0.35784
+#            2      107.58      524.38     0.41833
+#            3      107.29       478.5     0.46096
+#            4         107      446.26     0.49113
+#            5       106.7      421.85     0.51618
+#            6      107.62      399.23     0.53987
+#            7      109.39      379.52     0.55968
+#            8      108.83      363.36     0.57798
+#            9      107.98      348.08     0.59201
+#           10      107.88      337.13     0.60581
+#           11      106.66      322.06     0.61837
+#           12      106.85      313.77     0.62828
+#           13      106.72      304.08     0.64047
+#           14      106.69      293.42     0.64978
+#           15      106.62      286.56     0.65798
+#           16      106.61      277.47     0.66787
+#           17      106.43      271.28     0.67516
+#           18      106.86       264.2     0.68212
+#           19      107.21      257.29     0.69141
+#           20      107.13      251.61     0.69711
+#           21      107.06      247.09     0.70105
