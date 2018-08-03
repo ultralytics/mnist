@@ -1,5 +1,6 @@
 import math
 import random
+import argparse
 
 import cv2
 import torch
@@ -14,6 +15,10 @@ from utils import *
 torch.set_printoptions(linewidth=320, precision=8)
 np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-name', default='chips_0pad_fitted', help='run name')
+parser.add_argument('-resume', default=False, help='resume training flag')
+opt = parser.parse_args()
 
 def xview_class_weights(indices):  # weights of each class in the training set, normalized to mu = 1
     weights = 1 / torch.FloatTensor(
@@ -112,8 +117,6 @@ class ConvNetb(nn.Module):
 
 # @profile
 def main(model):
-    name = 'chips_20pad_fitted'
-
     lr = .0001
     epochs = 1000
     printerval = 1
@@ -141,7 +144,7 @@ def main(model):
 
     # load > 2GB .mat files with h5py
     import h5py
-    with h5py.File('../' + name + '.h5') as mat:
+    with h5py.File('../' + opt.name + '.h5') as mat:
         X = mat.get('X').value
         Y = mat.get('Y').value
 
@@ -158,11 +161,10 @@ def main(model):
     # del X, Y
 
     # Load saved model
-    resume = False
     start_epoch = 0
     best_loss = float('inf')
-    if resume:
-        checkpoint = torch.load(name+ '.pt', map_location='cuda:0' if cuda else 'cpu')
+    if opt.resume:
+        checkpoint = torch.load(opt.name+ '.pt', map_location='cuda:0' if cuda else 'cpu')
 
         model.load_state_dict(checkpoint['model'])
         model = model.to(device).train()
@@ -272,7 +274,7 @@ def main(model):
                         'accuracy': accuracy,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
-                       name + '.pt')
+                       opt.name + '.pt')
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
@@ -338,7 +340,6 @@ if __name__ == '__main__':
 #           18      56.941      412.04     0.52933
 #           19      57.092       408.4     0.53467
 #           20      56.203      405.08     0.53933
-#           21      56.807      401.29     0.54273
 
 # 64+64 chips, 4 layer, 64 filter, 1e-4 lr, weighted choice
 # 18 layers, 3.51904e+06 parameters, 3.51904e+06 gradients
@@ -364,7 +365,6 @@ if __name__ == '__main__':
 #           18      67.563      320.75     0.62496
 #           19      66.685      314.04     0.63251
 #           20      66.962      309.61     0.63594
-#           21      69.335      306.29      0.6382
 
 # 64+64 chips, 5 layer, 64 filter, 1e-4 lr, weighted choice
 # 22 layers, 7.25766e+06 parameters, 7.25766e+06 gradients
@@ -390,7 +390,6 @@ if __name__ == '__main__':
 #           18      79.131      258.86     0.69176
 #           19      79.578      252.74     0.69823
 #           20      79.602      248.09     0.70239
-#           21      79.201      242.78     0.70802
 
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice
 # 26 layers, 2.56467e+07 parameters, 2.56467e+07 gradients
@@ -416,9 +415,8 @@ if __name__ == '__main__':
 #           18      110.97       199.9     0.75598
 #           19      111.33      196.14     0.76011
 #           20      111.66      190.75     0.76805
-#           21      111.73      184.98     0.77273
 
-# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 0% padding, square
 # 20 layers, 2.56426e+07 parameters, 2.56426e+07 gradients
 #        epoch        time        loss   metric(s)
 #            0      112.74      743.18     0.22663
@@ -442,4 +440,20 @@ if __name__ == '__main__':
 #           18      106.86       264.2     0.68212
 #           19      107.21      257.29     0.69141
 #           20      107.13      251.61     0.69711
-#           21      107.06      247.09     0.70105
+
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 0% padding, fitted
+
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 20% padding, fitted
+
+
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, fitted
+
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 20% padding, square
+
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, square
+
