@@ -74,27 +74,27 @@ class ConvNetb(nn.Module):
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer2 = nn.Sequential(
             nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 2),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer3 = nn.Sequential(
             nn.Conv2d(n * 2, n * 4, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 4),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer4 = nn.Sequential(
             nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 8),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer5 = nn.Sequential(
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer6 = nn.Sequential(
             nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 32),
-            nn.LeakyReLU())
+            nn.ReLU())
         # self.layer7 = nn.Sequential(
         #     nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
         #     nn.BatchNorm2d(n * 64),
@@ -416,8 +416,47 @@ if __name__ == '__main__':
 #           19      111.33      196.14     0.76011
 #           20      111.66      190.75     0.76805
 
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 0% padding, fitted
+#        epoch        time        loss   metric(s)
+#            0      109.59      735.77     0.23381
+#            1      108.29      586.93     0.35937
+#            2      108.48      526.68      0.4152
+#            3      108.85      480.95     0.45845
+#            4      108.58      450.32     0.48716
+#            5      119.43      424.43     0.51524
+#            6      107.33       402.4     0.53763
+#            7      107.14      384.57     0.55533
+#            8      107.17       365.2     0.57515
+#            9      107.13      352.65     0.59023
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 20% padding, fitted
+#        epoch        time        loss   metric(s)
+#            0      108.85      725.42     0.23908
+#            1      107.17      577.24     0.36326
+#            2      107.04      515.71     0.42082
+#            3      107.29      473.28     0.46295
+#            4      107.16      440.75     0.49201
+#            5      106.62       417.8     0.51934
+#            6      106.91      396.42     0.53895
+#            7       107.1      375.57     0.55968
+#            8      107.02      360.21     0.57664
+#            9      106.82       346.6     0.59196
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, fitted
+#        epoch        time        loss   metric(s)
+#            0      109.39      737.26     0.23002
+#            1      106.75      584.28     0.35811
+#            2      107.38      523.43     0.41684
+#            3      107.93      480.15     0.45774
+#            4      107.42      446.59     0.49093
+#            5      107.53       421.9     0.51511
+#            6      127.86      401.07     0.53674
+#            7      107.33      381.23     0.55757
+#            8      107.03      362.33     0.57763
+#            9       107.7      350.94     0.59009
+
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 0% padding, square
-# 20 layers, 2.56426e+07 parameters, 2.56426e+07 gradients
 #        epoch        time        loss   metric(s)
 #            0      112.74      743.18     0.22663
 #            1      107.21      587.75     0.35784
@@ -441,28 +480,50 @@ if __name__ == '__main__':
 #           19      107.21      257.29     0.69141
 #           20      107.13      251.61     0.69711
 
-
-# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 0% padding, fitted
-
-
-# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 20% padding, fitted
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 10% padding, square
 #        epoch        time        loss   metric(s)
-#            0      108.85      725.42     0.23908
-#            1      107.17      577.24     0.36326
-#            2      107.04      515.71     0.42082
-#            3      107.29      473.28     0.46295
-#            4      107.16      440.75     0.49201
-#            5      106.62       417.8     0.51934
-#            6      106.91      396.42     0.53895
-#            7       107.1      375.57     0.55968
-#            8      107.02      360.21     0.57664
-#            9      106.82       346.6     0.59196
-
-
-# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, fitted
-
+#            0      110.02      735.73     0.23314
+#            1       108.1      582.32     0.36034
+#            2      108.12      519.97     0.42187
+#            3      108.53      475.33     0.46494
+#            4      108.45      440.62     0.49518
+#            5      108.68      418.36     0.51985
+#            6      109.23      395.31     0.54194
+#            7      108.08      378.71     0.55991
+#            8      108.09      359.13     0.57868
+#            9      107.79      344.46      0.5949
 
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 20% padding, square
+#        epoch        time        loss   metric(s)
+#            0      110.24       730.9     0.23271
+#            1      107.62      577.26     0.36438
+#            2      107.35       515.6      0.4228
+#            3      107.62      472.82     0.46387
+#            4      124.13      440.62     0.49341
+#            5      107.23      417.91     0.51763
+#            6      106.75      395.48     0.53978
+#            7      106.99      377.17     0.55851
+#            8      106.89      359.45     0.57787
+#            9      106.77       345.5      0.5922
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 30% padding, square
 
 
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, square
+#        epoch        time        loss   metric(s)
+#            0      109.36      741.57     0.22691
+#            1      107.26       586.7     0.35703
+#            2      107.15      521.84     0.41817
+#            3      107.53       480.9     0.45491
+#            4      107.45      449.71      0.4861
+#            5       107.2      424.02     0.51415
+#            6      107.52      401.43     0.53515
+#            7      108.87         383     0.55549
+#            8      108.85      363.85     0.57416
+#            9      108.63      348.33     0.59212
+
+
+# 30% square normal ReLU
+
+
+# winner -----> 7-layer (100M neurons!!!!)
