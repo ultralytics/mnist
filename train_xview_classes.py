@@ -9,16 +9,14 @@ import torch.nn.functional as F
 
 from utils import *
 
-# import torchvision
-# from torchvision import datasets, transforms
-
-torch.set_printoptions(linewidth=320, precision=8)
-np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
-
 parser = argparse.ArgumentParser()
 parser.add_argument('-name', default='chips_0pad_fitted', help='run name')
 parser.add_argument('-resume', default=False, help='resume training flag')
 opt = parser.parse_args()
+
+torch.set_printoptions(linewidth=320, precision=8)
+np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
+
 
 def xview_class_weights(indices):  # weights of each class in the training set, normalized to mu = 1
     weights = 1 / torch.FloatTensor(
@@ -41,7 +39,6 @@ class MLP(nn.Module):
         x = x.view(-1, 28 * 28)
         x = self.fc1(x)
         x = F.relu(x)
-        # x, _, _ = normalize(x, axis=1)
         x = self.fc2(x)
         return x
 
@@ -98,8 +95,11 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 32),
             nn.LeakyReLU())
-        # self.fc = nn.Linear(65536, num_classes)  # 64 pixels, 3 layer, 64 filters
-        # self.fc = nn.Linear(32768, num_classes)  # 64 pixels, 3 layer, 32 filters
+        # self.layer7 = nn.Sequential(
+        #     nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
+        #     nn.BatchNorm2d(n * 64),
+        #     nn.LeakyReLU())
+
         self.fc = nn.Linear(int(32768 / 4), num_classes)  # 64 pixels, 4 layer, 64 filters
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
@@ -109,8 +109,8 @@ class ConvNetb(nn.Module):
         x = self.layer4(x)
         x = self.layer5(x)
         x = self.layer6(x)
+        # x = self.layer7(x)
         x = x.reshape(x.size(0), -1)
-        # x, _, _ = normalize(x,1)
         x = self.fc(x)
         return x
 
@@ -164,7 +164,7 @@ def main(model):
     start_epoch = 0
     best_loss = float('inf')
     if opt.resume:
-        checkpoint = torch.load(opt.name+ '.pt', map_location='cuda:0' if cuda else 'cpu')
+        checkpoint = torch.load(opt.name + '.pt', map_location='cuda:0' if cuda else 'cpu')
 
         model.load_state_dict(checkpoint['model'])
         model = model.to(device).train()
@@ -196,7 +196,7 @@ def main(model):
     shape = X.shape[1:3]
     height = shape[0]
 
-    # modelinfo(model)
+    modelinfo(model)
 
     def train(model):
         vC = torch.zeros(60).to(device)  # vector correct
@@ -446,7 +446,17 @@ if __name__ == '__main__':
 
 
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 20% padding, fitted
-
+#        epoch        time        loss   metric(s)
+#            0      108.85      725.42     0.23908
+#            1      107.17      577.24     0.36326
+#            2      107.04      515.71     0.42082
+#            3      107.29      473.28     0.46295
+#            4      107.16      440.75     0.49201
+#            5      106.62       417.8     0.51934
+#            6      106.91      396.42     0.53895
+#            7       107.1      375.57     0.55968
+#            8      107.02      360.21     0.57664
+#            9      106.82       346.6     0.59196
 
 
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, fitted
@@ -456,4 +466,3 @@ if __name__ == '__main__':
 
 
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, square
-
