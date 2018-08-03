@@ -139,7 +139,7 @@ def main(model):
 
     # load > 2GB .mat files with h5py
     import h5py
-    with h5py.File('/Users/glennjocher/Documents/PyCharmProjects/yolo/class_chips64+64_tight.h5') as mat:
+    with h5py.File('../class_chips64+64_relaxed.h5') as mat:
         X = mat.get('X').value
         Y = mat.get('Y').value
 
@@ -262,7 +262,7 @@ def main(model):
                         'accuracy': accuracy,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
-                       'best64_6layerLeaky.pt')
+                       'best64_6layerLeakyRelaxed.pt')
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
