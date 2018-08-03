@@ -95,12 +95,12 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 32),
             nn.ReLU())
-        # self.layer7 = nn.Sequential(
-        #     nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
-        #     nn.BatchNorm2d(n * 64),
-        #     nn.LeakyReLU())
+        self.layer7 = nn.Sequential(
+            nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(n * 64),
+            nn.LeakyReLU())
 
-        self.fc = nn.Linear(int(32768 / 4), num_classes)  # 64 pixels, 4 layer, 64 filters
+        self.fc = nn.Linear(int(32768 / 8), num_classes)  # 64 pixels, 4 layer, 64 filters
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
         x = self.layer1(x)
@@ -109,7 +109,7 @@ class ConvNetb(nn.Module):
         x = self.layer4(x)
         x = self.layer5(x)
         x = self.layer6(x)
-        # x = self.layer7(x)
+        x = self.layer7(x)
         x = x.reshape(x.size(0), -1)
         x = self.fc(x)
         return x
@@ -507,7 +507,17 @@ if __name__ == '__main__':
 #            9      106.77       345.5      0.5922
 
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 30% padding, square
-
+#        epoch        time        loss   metric(s)
+#            0      109.46      733.33     0.23549
+#            1      107.19      579.46     0.36461
+#            2      106.98      516.34     0.42373
+#            3      107.18      474.06      0.4635
+#            4      107.19       441.6     0.49373
+#            5      107.41      417.56     0.51907
+#            6      107.36      393.83     0.54396
+#            7       107.2      375.34     0.56278
+#            8      106.94      357.22     0.58197
+#            9      107.24      345.82     0.59314
 
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, square
 #        epoch        time        loss   metric(s)
@@ -522,8 +532,20 @@ if __name__ == '__main__':
 #            8      108.85      363.85     0.57416
 #            9      108.63      348.33     0.59212
 
+# 20% square normal ReLU
+#        epoch        time        loss   metric(s)
+#            0       108.9      737.91     0.22539
+#            1      107.14      579.42     0.36284
+#            2      106.87         516     0.42225
+#            3      107.13      474.06     0.46322
+#            4      107.28      442.12     0.49258
+#            5      107.05      417.04      0.5179
+#            6      107.19      394.21      0.5398
+#            7      107.34      375.35     0.56192
+#            8      106.97         356     0.58147
+#            9      107.19      341.74     0.59599
 
-# 30% square normal ReLU
+# winner ---> 20% square padding LeakyReLU ---> 7-layer (100M neurons!!!!)
 
 
-# winner -----> 7-layer (100M neurons!!!!)
+#sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -name 'chips_20pad_square'
