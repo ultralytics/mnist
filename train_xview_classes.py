@@ -174,10 +174,10 @@ def main(model):
         del checkpoint
     else:
         nGPU = torch.cuda.device_count()
-        print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
         if nGPU > 1:
             print('%g GPUs found.' % nGPU)
-            model = nn.DataParallel(model).to(device).train()
+            model = nn.DataParallel(model)
+            model.to(device).train()
         else:
             model = model.to(device).train()
 
@@ -191,7 +191,7 @@ def main(model):
     border = 32
     shape = X.shape[1:3]
     height = shape[0]
-    modelinfo(model)
+    # modelinfo(model)
 
     def train(model):
         vC = torch.zeros(60).to(device)  # vector correct
