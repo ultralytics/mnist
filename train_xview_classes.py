@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from utils import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-name', default='chips_0pad_fitted', help='run name')
+parser.add_argument('-name', default='chips_20pad_6layer', help='run name')
 parser.add_argument('-resume', default=False, help='resume training flag')
 opt = parser.parse_args()
 
@@ -546,6 +546,17 @@ if __name__ == '__main__':
 #            9      107.19      341.74     0.59599
 
 # winner ---> 20% square padding LeakyReLU ---> 7-layer (100M neurons!!!!)
-
+# 23 layers, 1.00903e+08 parameters, 1.00903e+08 gradients
+#        epoch        time        loss   metric(s)
+#            0      217.05      700.71     0.26018
+#            1       211.1         540     0.39818
+#            2      210.54       476.1     0.45874
+#            3      210.49      429.02     0.50559
+#            4      210.54       394.6     0.53926
+#            5      210.58      369.43     0.56643
+#            6      211.34      347.43     0.58892
+#            7       210.4      327.45     0.61295
+#            8       210.3      307.95     0.63262
+#            9      210.31      294.63     0.64601
 
 # sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -name 'chips_20pad_square'
