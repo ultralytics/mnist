@@ -98,7 +98,7 @@ class ConvNetb(nn.Module):
         self.layer7 = nn.Sequential(
             nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 64),
-            nn.LeakyReLU())
+            nn.ReLU())
 
         self.fc = nn.Linear(int(32768 / 8), num_classes)  # 64 pixels, 4 layer, 64 filters
 
@@ -548,4 +548,4 @@ if __name__ == '__main__':
 # winner ---> 20% square padding LeakyReLU ---> 7-layer (100M neurons!!!!)
 
 
-#sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -name 'chips_20pad_square'
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -name 'chips_20pad_square'
