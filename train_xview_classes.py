@@ -112,6 +112,8 @@ class ConvNetb(nn.Module):
 
 # @profile
 def main(model):
+    name = 'chips_20pad_fitted'
+
     lr = .0001
     epochs = 1000
     printerval = 1
@@ -139,7 +141,7 @@ def main(model):
 
     # load > 2GB .mat files with h5py
     import h5py
-    with h5py.File('../class_chips64+64_relaxed.h5') as mat:
+    with h5py.File('../' + name + '.h5') as mat:
         X = mat.get('X').value
         Y = mat.get('Y').value
 
@@ -160,7 +162,7 @@ def main(model):
     start_epoch = 0
     best_loss = float('inf')
     if resume:
-        checkpoint = torch.load('best64_6layer.pt', map_location='cuda:0' if cuda else 'cpu')
+        checkpoint = torch.load(name+ '.pt', map_location='cuda:0' if cuda else 'cpu')
 
         model.load_state_dict(checkpoint['model'])
         model = model.to(device).train()
@@ -269,7 +271,7 @@ def main(model):
                         'accuracy': accuracy,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
-                       'best64_6layerLeakyRelaxed.pt')
+                       name + '.pt')
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
