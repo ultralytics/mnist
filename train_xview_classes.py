@@ -160,7 +160,7 @@ def main(model):
     start_epoch = 0
     best_loss = float('inf')
     if resume:
-        checkpoint = torch.load('best64_....pt', map_location='cuda:0' if cuda else 'cpu')
+        checkpoint = torch.load('best64_6layer.pt', map_location='cuda:0' if cuda else 'cpu')
 
         model.load_state_dict(checkpoint['model'])
         model = model.to(device).train()
@@ -199,7 +199,7 @@ def main(model):
 
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
             for j in range(batch_size):
-                M = random_affine(degrees=(-179, 179), translate=(.1, .1), scale=(.8, 1.20), shear=(-2, 2),
+                M = random_affine(degrees=(-179.9, 179.9), translate=(.15, .15), scale=(.6, 1.40), shear=(-5, 5),
                                   shape=shape)
 
                 x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
@@ -262,7 +262,7 @@ def main(model):
                         'accuracy': accuracy,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
-                       'best64_6layer.pt')
+                       'best64_6layerLeaky.pt')
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
