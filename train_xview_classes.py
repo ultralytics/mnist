@@ -1,5 +1,6 @@
 import math
 import random
+import argparse
 
 import cv2
 import torch
@@ -8,8 +9,10 @@ import torch.nn.functional as F
 
 from utils import *
 
-# import torchvision
-# from torchvision import datasets, transforms
+parser = argparse.ArgumentParser()
+parser.add_argument('-name', default='chips_20pad_6layer', help='run name')
+parser.add_argument('-resume', default=False, help='resume training flag')
+opt = parser.parse_args()
 
 torch.set_printoptions(linewidth=320, precision=8)
 np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
@@ -36,7 +39,6 @@ class MLP(nn.Module):
         x = x.view(-1, 28 * 28)
         x = self.fc1(x)
         x = F.relu(x)
-        # x, _, _ = normalize(x, axis=1)
         x = self.fc2(x)
         return x
 
@@ -72,30 +74,33 @@ class ConvNetb(nn.Module):
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer2 = nn.Sequential(
             nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 2),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer3 = nn.Sequential(
             nn.Conv2d(n * 2, n * 4, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 4),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer4 = nn.Sequential(
             nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 8),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer5 = nn.Sequential(
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer6 = nn.Sequential(
             nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 32),
-            nn.LeakyReLU())
-        # self.fc = nn.Linear(65536, num_classes)  # 64 pixels, 3 layer, 64 filters
-        # self.fc = nn.Linear(32768, num_classes)  # 64 pixels, 3 layer, 32 filters
-        self.fc = nn.Linear(int(32768 / 4), num_classes)  # 64 pixels, 4 layer, 64 filters
+            nn.ReLU())
+        self.layer7 = nn.Sequential(
+            nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(n * 64),
+            nn.ReLU())
+
+        self.fc = nn.Linear(int(32768 / 8), num_classes)  # 64 pixels, 4 layer, 64 filters
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]
         x = self.layer1(x)
@@ -104,8 +109,8 @@ class ConvNetb(nn.Module):
         x = self.layer4(x)
         x = self.layer5(x)
         x = self.layer6(x)
+        x = self.layer7(x)
         x = x.reshape(x.size(0), -1)
-        # x, _, _ = normalize(x,1)
         x = self.fc(x)
         return x
 
@@ -139,7 +144,7 @@ def main(model):
 
     # load > 2GB .mat files with h5py
     import h5py
-    with h5py.File('../class_chips64+64_relaxed.h5') as mat:
+    with h5py.File('../' + opt.name + '.h5') as mat:
         X = mat.get('X').value
         Y = mat.get('Y').value
 
@@ -156,11 +161,10 @@ def main(model):
     # del X, Y
 
     # Load saved model
-    resume = False
     start_epoch = 0
     best_loss = float('inf')
-    if resume:
-        checkpoint = torch.load('best64_6layer.pt', map_location='cuda:0' if cuda else 'cpu')
+    if opt.resume:
+        checkpoint = torch.load(opt.name + '.pt', map_location='cuda:0' if cuda else 'cpu')
 
         model.load_state_dict(checkpoint['model'])
         model = model.to(device).train()
@@ -192,7 +196,7 @@ def main(model):
     shape = X.shape[1:3]
     height = shape[0]
 
-    # modelinfo(model)
+    modelinfo(model)
 
     def train(model):
         vC = torch.zeros(60).to(device)  # vector correct
@@ -270,7 +274,7 @@ def main(model):
                         'accuracy': accuracy,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
-                       'best64_6layerLeakyRelaxed.pt')
+                       opt.name + '.pt')
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
@@ -336,7 +340,6 @@ if __name__ == '__main__':
 #           18      56.941      412.04     0.52933
 #           19      57.092       408.4     0.53467
 #           20      56.203      405.08     0.53933
-#           21      56.807      401.29     0.54273
 
 # 64+64 chips, 4 layer, 64 filter, 1e-4 lr, weighted choice
 # 18 layers, 3.51904e+06 parameters, 3.51904e+06 gradients
@@ -362,7 +365,6 @@ if __name__ == '__main__':
 #           18      67.563      320.75     0.62496
 #           19      66.685      314.04     0.63251
 #           20      66.962      309.61     0.63594
-#           21      69.335      306.29      0.6382
 
 # 64+64 chips, 5 layer, 64 filter, 1e-4 lr, weighted choice
 # 22 layers, 7.25766e+06 parameters, 7.25766e+06 gradients
@@ -388,7 +390,6 @@ if __name__ == '__main__':
 #           18      79.131      258.86     0.69176
 #           19      79.578      252.74     0.69823
 #           20      79.602      248.09     0.70239
-#           21      79.201      242.78     0.70802
 
 # 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice
 # 26 layers, 2.56467e+07 parameters, 2.56467e+07 gradients
@@ -414,10 +415,48 @@ if __name__ == '__main__':
 #           18      110.97       199.9     0.75598
 #           19      111.33      196.14     0.76011
 #           20      111.66      190.75     0.76805
-#           21      111.73      184.98     0.77273
 
-# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu
-# 20 layers, 2.56426e+07 parameters, 2.56426e+07 gradients
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 0% padding, fitted
+#        epoch        time        loss   metric(s)
+#            0      109.59      735.77     0.23381
+#            1      108.29      586.93     0.35937
+#            2      108.48      526.68      0.4152
+#            3      108.85      480.95     0.45845
+#            4      108.58      450.32     0.48716
+#            5      119.43      424.43     0.51524
+#            6      107.33       402.4     0.53763
+#            7      107.14      384.57     0.55533
+#            8      107.17       365.2     0.57515
+#            9      107.13      352.65     0.59023
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 20% padding, fitted
+#        epoch        time        loss   metric(s)
+#            0      108.85      725.42     0.23908
+#            1      107.17      577.24     0.36326
+#            2      107.04      515.71     0.42082
+#            3      107.29      473.28     0.46295
+#            4      107.16      440.75     0.49201
+#            5      106.62       417.8     0.51934
+#            6      106.91      396.42     0.53895
+#            7       107.1      375.57     0.55968
+#            8      107.02      360.21     0.57664
+#            9      106.82       346.6     0.59196
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, fitted
+#        epoch        time        loss   metric(s)
+#            0      109.39      737.26     0.23002
+#            1      106.75      584.28     0.35811
+#            2      107.38      523.43     0.41684
+#            3      107.93      480.15     0.45774
+#            4      107.42      446.59     0.49093
+#            5      107.53       421.9     0.51511
+#            6      127.86      401.07     0.53674
+#            7      107.33      381.23     0.55757
+#            8      107.03      362.33     0.57763
+#            9       107.7      350.94     0.59009
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 0% padding, square
 #        epoch        time        loss   metric(s)
 #            0      112.74      743.18     0.22663
 #            1      107.21      587.75     0.35784
@@ -440,4 +479,84 @@ if __name__ == '__main__':
 #           18      106.86       264.2     0.68212
 #           19      107.21      257.29     0.69141
 #           20      107.13      251.61     0.69711
-#           21      107.06      247.09     0.70105
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 10% padding, square
+#        epoch        time        loss   metric(s)
+#            0      110.02      735.73     0.23314
+#            1       108.1      582.32     0.36034
+#            2      108.12      519.97     0.42187
+#            3      108.53      475.33     0.46494
+#            4      108.45      440.62     0.49518
+#            5      108.68      418.36     0.51985
+#            6      109.23      395.31     0.54194
+#            7      108.08      378.71     0.55991
+#            8      108.09      359.13     0.57868
+#            9      107.79      344.46      0.5949
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 20% padding, square
+#        epoch        time        loss   metric(s)
+#            0      110.24       730.9     0.23271
+#            1      107.62      577.26     0.36438
+#            2      107.35       515.6      0.4228
+#            3      107.62      472.82     0.46387
+#            4      124.13      440.62     0.49341
+#            5      107.23      417.91     0.51763
+#            6      106.75      395.48     0.53978
+#            7      106.99      377.17     0.55851
+#            8      106.89      359.45     0.57787
+#            9      106.77       345.5      0.5922
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 30% padding, square
+#        epoch        time        loss   metric(s)
+#            0      109.46      733.33     0.23549
+#            1      107.19      579.46     0.36461
+#            2      106.98      516.34     0.42373
+#            3      107.18      474.06      0.4635
+#            4      107.19       441.6     0.49373
+#            5      107.41      417.56     0.51907
+#            6      107.36      393.83     0.54396
+#            7       107.2      375.34     0.56278
+#            8      106.94      357.22     0.58197
+#            9      107.24      345.82     0.59314
+
+# 64+64 chips, 6 layer, 64 filter, 1e-4 lr, weighted choice, higher augment, leakyRelu, 40% padding, square
+#        epoch        time        loss   metric(s)
+#            0      109.36      741.57     0.22691
+#            1      107.26       586.7     0.35703
+#            2      107.15      521.84     0.41817
+#            3      107.53       480.9     0.45491
+#            4      107.45      449.71      0.4861
+#            5       107.2      424.02     0.51415
+#            6      107.52      401.43     0.53515
+#            7      108.87         383     0.55549
+#            8      108.85      363.85     0.57416
+#            9      108.63      348.33     0.59212
+
+# 20% square normal ReLU
+#        epoch        time        loss   metric(s)
+#            0       108.9      737.91     0.22539
+#            1      107.14      579.42     0.36284
+#            2      106.87         516     0.42225
+#            3      107.13      474.06     0.46322
+#            4      107.28      442.12     0.49258
+#            5      107.05      417.04      0.5179
+#            6      107.19      394.21      0.5398
+#            7      107.34      375.35     0.56192
+#            8      106.97         356     0.58147
+#            9      107.19      341.74     0.59599
+
+# winner ---> 20% square padding LeakyReLU ---> 7-layer (100M neurons!!!!)
+# 23 layers, 1.00903e+08 parameters, 1.00903e+08 gradients
+#        epoch        time        loss   metric(s)
+#            0      217.05      700.71     0.26018
+#            1       211.1         540     0.39818
+#            2      210.54       476.1     0.45874
+#            3      210.49      429.02     0.50559
+#            4      210.54       394.6     0.53926
+#            5      210.58      369.43     0.56643
+#            6      211.34      347.43     0.58892
+#            7       210.4      327.45     0.61295
+#            8       210.3      307.95     0.63262
+#            9      210.31      294.63     0.64601
+
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -name 'chips_20pad_square'
