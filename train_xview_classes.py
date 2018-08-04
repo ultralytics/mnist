@@ -13,7 +13,7 @@ from utils import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-h5_name', default='../chips_10pad_square.h5', help='h5 filename')
-parser.add_argument('-run_name', default='10pad_6leaky_fullyconnected.pt', help='run name')
+parser.add_argument('-run_name', default='10pad_6ReLU_fullyconnected.pt', help='run name')
 parser.add_argument('-resume', default=False, help='resume training flag')
 opt = parser.parse_args()
 
@@ -77,27 +77,27 @@ class ConvNetb(nn.Module):
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer2 = nn.Sequential(
             nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 2),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer3 = nn.Sequential(
             nn.Conv2d(n * 2, n * 4, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 4),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer4 = nn.Sequential(
             nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 8),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer5 = nn.Sequential(
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
-            nn.LeakyReLU())
+            nn.ReLU())
         self.layer6 = nn.Sequential(
             nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 32),
-            nn.LeakyReLU())
+            nn.ReLU())
         # self.layer7 = nn.Sequential(
         #     nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
         #     nn.BatchNorm2d(n * 64),
