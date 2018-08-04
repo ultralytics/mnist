@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 from utils import *
 
-# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name 'test.pt'
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '10pad_6leaky_fullyconnected.pt'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-h5_name', default='../chips_10pad_square.h5', help='h5 filename')
@@ -563,6 +563,19 @@ if __name__ == '__main__':
 #            7      107.34      375.35     0.56192
 #            8      106.97         356     0.58147
 #            9      107.19      341.74     0.59599
+
+# 20% square normal ReLU, Fully Convolutional
+# epoch        time        loss   metric(s)
+#            0      109.12      733.68     0.23079
+#            1      107.11      572.85     0.36909
+#            2      106.85      510.56     0.42809
+#            3       106.5      467.99     0.46835
+#            4      107.57      437.03     0.49939
+#            5      107.72       409.7     0.52529
+#            6       107.8      389.43     0.54693
+#            7      107.55      370.69      0.5673
+#            8      119.75      352.89     0.58503
+#            9      107.21      341.62     0.59711
 
 # winner ---> 20% square padding LeakyReLU ---> 7-layer (100M neurons!!!!)
 # 23 layers, 1.00903e+08 parameters, 1.00903e+08 gradients
