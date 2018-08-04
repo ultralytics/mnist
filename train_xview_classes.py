@@ -270,7 +270,7 @@ def main(model):
         loss, accuracy = train(model.train())
 
         # Save best checkpoint
-        if (epoch >= 0) & (loss.item() < best_loss):
+        if (epoch >= 100) & (loss.item() < best_loss):
             best_loss = loss.item()
             torch.save({'epoch': epoch,
                         'best_loss': best_loss,
