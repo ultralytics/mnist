@@ -12,7 +12,7 @@ from utils import *
 # sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '20pad_7layer.pt'
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-h5_name', default='../chips_20pad_square.h5', help='h5 filename')
+parser.add_argument('-h5_name', default='../chips_0pad_square.h5', help='h5 filename')
 parser.add_argument('-run_name', default='20pad_7layer.pt', help='run name')
 parser.add_argument('-resume', default=False, help='resume training flag')
 opt = parser.parse_args()
@@ -98,24 +98,25 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 32),
             nn.ReLU())
-        self.layer7 = nn.Sequential(
-            nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(n * 64),
-            nn.ReLU())
+        # self.layer7 = nn.Sequential(
+        #     nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
+        #     nn.BatchNorm2d(n * 64),
+        #     nn.ReLU())
 
-        self.fc = nn.Linear(int(32768 / 8), num_classes)  # 64 pixels, 4 layer, 64 filters
+        # self.fc = nn.Linear(int(8192), num_classes)  # 64 pixels, 4 layer, 64 filters
+        self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)
 
-    def forward(self, x):  # x.size() = [512, 1, 28, 28]
+    def forward(self, x):  # 500 x 1 x 64 x 64
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.layer5(x)
         x = self.layer6(x)
-        x = self.layer7(x)
-        x = x.reshape(x.size(0), -1)
-        x = self.fc(x)
-        return x
+        # x = self.layer7(x)
+        # x = self.fc(x.reshape(x.size(0), -1))
+        x = self.fully_convolutional(x)
+        return x.squeeze()  # 500 x 60
 
 
 # @profile
@@ -318,6 +319,20 @@ def stripOptimizer():
 
 if __name__ == '__main__':
     main(ConvNetb())
+
+# Fully Convolutional
+# 15            layer6.0.weight      True  1.88744e+07 [2048, 1024, 3, 3]
+# 16            layer6.1.weight      True         2048 [2048]
+# 17              layer6.1.bias      True         2048 [2048]
+# 18                  fc.weight      True       491520 [60, 2048, 2, 2]
+# 19                    fc.bias      True           60 [60]
+
+# Fully Connected
+#   15            layer6.0.weight      True  1.88744e+07 [2048, 1024, 3, 3]
+#   16            layer6.1.weight      True         2048 [2048]
+#   17              layer6.1.bias      True         2048 [2048]
+#   18                  fc.weight      True       491520 [60, 8192]
+#   19                    fc.bias      True           60 [60]
 
 # 64+64 chips, 3 layer, 64 filter, 1e-4 lr, weighted choice
 # 14 layers, 4.30393e+06 parameters, 4.30393e+06 gradients
