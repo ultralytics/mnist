@@ -311,9 +311,9 @@ def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=
 
 def stripOptimizer():
     import torch
-    a = torch.load('best64_6layerLeaky.pt', map_location='cpu')
+    a = torch.load('6leaky681.pt', map_location='cpu')
     a['optimizer'] = []
-    torch.save(a, '6leaky573.pt')
+    torch.save(a, '6leaky681_stripped.pt')
 
 
 if __name__ == '__main__':
