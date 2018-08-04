@@ -9,8 +9,11 @@ import torch.nn.functional as F
 
 from utils import *
 
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '20pad_7layer.pt'
+
 parser = argparse.ArgumentParser()
-parser.add_argument('-name', default='chips_20pad_6layer', help='run name')
+parser.add_argument('-h5_name', default='../chips_20pad_6layer.h5', help='h5 filename')
+parser.add_argument('-run_name', default='20pad_7layer.pt', help='run name')
 parser.add_argument('-resume', default=False, help='resume training flag')
 opt = parser.parse_args()
 
@@ -144,9 +147,9 @@ def main(model):
 
     # load > 2GB .mat files with h5py
     import h5py
-    with h5py.File('../' + opt.name + '.h5') as mat:
-        X = mat.get('X').value
-        Y = mat.get('Y').value
+    with h5py.File(opt.h5_name) as h5:
+        X = h5.get('X').value
+        Y = h5.get('Y').value
 
     # # load with pickle
     # pickle.dump({'X': X, 'Y': Y}, open('save.p', "wb"), protocol=4)
@@ -164,7 +167,7 @@ def main(model):
     start_epoch = 0
     best_loss = float('inf')
     if opt.resume:
-        checkpoint = torch.load(opt.name + '.pt', map_location='cuda:0' if cuda else 'cpu')
+        checkpoint = torch.load(opt.run_name, map_location='cuda:0' if cuda else 'cpu')
 
         model.load_state_dict(checkpoint['model'])
         model = model.to(device).train()
@@ -203,7 +206,7 @@ def main(model):
         vS = torch.zeros(60).long().to(device)  # vecgtor samples
         loss_cum = torch.FloatTensor([0]).to(device)
         nS = len(Y)
-        v = np.random.permutation(nS)
+        # v = np.random.permutation(nS)
         for batch in range(int(nS / batch_size)):
             # i = v[batch * batch_size:(batch + 1) * batch_size]  # ordered chip selection
             i = np.random.choice(nS, size=batch_size, p=weights)  # weighted chip selection
@@ -274,7 +277,7 @@ def main(model):
                         'accuracy': accuracy,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
-                       opt.name + '.pt')
+                       opt.run_name)
 
         if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
             break
@@ -558,5 +561,3 @@ if __name__ == '__main__':
 #            7       210.4      327.45     0.61295
 #            8       210.3      307.95     0.63262
 #            9      210.31      294.63     0.64601
-
-# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -name 'chips_20pad_square'
