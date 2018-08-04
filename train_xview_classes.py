@@ -77,27 +77,27 @@ class ConvNetb(nn.Module):
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
-            nn.ReLU())
+            nn.LeakyReLU())
         self.layer2 = nn.Sequential(
             nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 2),
-            nn.ReLU())
+            nn.LeakyReLU())
         self.layer3 = nn.Sequential(
             nn.Conv2d(n * 2, n * 4, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 4),
-            nn.ReLU())
+            nn.LeakyReLU())
         self.layer4 = nn.Sequential(
             nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 8),
-            nn.ReLU())
+            nn.LeakyReLU())
         self.layer5 = nn.Sequential(
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
-            nn.ReLU())
+            nn.LeakyReLU())
         self.layer6 = nn.Sequential(
             nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 32),
-            nn.ReLU())
+            nn.LeakyReLU())
         # self.layer7 = nn.Sequential(
         #     nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
         #     nn.BatchNorm2d(n * 64),
