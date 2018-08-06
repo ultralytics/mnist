@@ -225,7 +225,7 @@ def main(model):
         loss_cum = torch.FloatTensor([0]).to(device)
         nS = len(Y)
         # v = np.random.permutation(nS)
-        for batch in range(int(nS / batch_size)*0 + 3):
+        for batch in range(int(nS / batch_size)):
             # i = v[batch * batch_size:(batch + 1) * batch_size]  # ordered chip selection
             i = np.random.choice(nS, size=batch_size*100, p=weights)  # weighted chip selection
             x, y = X[i], Y[i]
