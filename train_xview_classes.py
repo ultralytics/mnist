@@ -206,7 +206,6 @@ def main(model):
 
     X = np.ascontiguousarray(X)
     Y = np.ascontiguousarray(Y.ravel())
-
     X_test = np.ascontiguousarray(X_test)
     Y_test = np.ascontiguousarray(Y_test.ravel())
 
