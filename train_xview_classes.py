@@ -237,7 +237,7 @@ def main(model):
                                   shape=shape)
 
                 x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
-                                           borderValue=[60.134, 49.697, 40.746])  # RGB
+                                           borderValue=[60, 50, 41])  # RGB
 
                 if random.random() > 0.5:
                     x[j] = x[j, :, ::-1]  # = np.flipud(x)
