@@ -273,8 +273,6 @@ def main(model):
             # x -= rgb_mean
             # x /= rgb_std
 
-            continue
-
             yhat = model(x)
             loss = criteria(yhat, y)
 
