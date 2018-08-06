@@ -239,7 +239,7 @@ def main(model):
                     img_hsv[:, :, 2] = V.astype(np.uint8)
                     cv2.cvtColor(img_hsv, cv2.COLOR_HSV2BGR, dst=x[j])
 
-                M = random_affine(degrees=(-179.9, 179.9), translate=(.15, .15), scale=(.7, 1.40), shear=(-3, 3),
+                M = random_affine(degrees=(-179.9, 179.9), translate=(.15, .15), scale=(.75, 1.40), shear=(-3, 3),
                                   shape=shape)
 
                 x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR)  # ,
@@ -254,9 +254,8 @@ def main(model):
             # for pi in range(16):
             #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50, border:-border, border:-border])
 
+            x = x[:, border:-border, border:-border]
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
-
-            x = x[:, :, border:-border, border:-border]
 
             # if random.random() > 0.25:
             #     np.rot90(x, k=np.random.choice([1, 2, 3]), axes=(2, 3))
