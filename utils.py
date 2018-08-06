@@ -143,7 +143,10 @@ class patienceStopper(object):
         if metrics is not None:
             for i in range(len(metrics)):
                 s += (metrics[i],)
-        print('%12.5g' * len(s) % s)
+        p = '%12.5g' * len(s) % s
+        print(p)
+        with open('results.txt', 'a') as file:
+            file.write(p + '\n')
         self.t = time.time()
 
     def final(self, msg):
