@@ -196,12 +196,17 @@ def main(model):
     mask = np.zeros(nS)
     for i in range(60):
         n = (Y == i).sum()
-        j = np.random.choice(nS, size=int(n * 0.1), p=weights)
-        mask[j] = 1
+        mask[np.random.choice(nS, size=int(n * 0.1), p=weights)] = 1
 
     mask = mask == 1
     X_test, Y_test = X[mask], Y[mask]
     X, Y = X[~mask], Y[~mask]
+
+    X = np.ascontiguousarray(X)
+    Y = np.ascontiguousarray(Y.ravel())
+
+    X_test = np.ascontiguousarray(X_test)
+    Y_test = np.ascontiguousarray(Y_test.ravel())
 
     weights = xview_class_weights(range(60))[Y].numpy()
     weights /= weights.sum()
@@ -219,9 +224,9 @@ def main(model):
         loss_cum = torch.FloatTensor([0]).to(device)
         nS = len(Y)
         # v = np.random.permutation(nS)
-        for batch in range(int(nS / batch_size)):
+        for batch in range(int(nS / batch_size)*0 + 3):
             # i = v[batch * batch_size:(batch + 1) * batch_size]  # ordered chip selection
-            i = np.random.choice(nS, size=batch_size, p=weights)  # weighted chip selection
+            i = np.random.choice(nS, size=batch_size*100, p=weights)  # weighted chip selection
             x, y = X[i], Y[i]
 
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
@@ -258,7 +263,8 @@ def main(model):
                 if random.random() > 0.5:
                     x[j] = x[j, :, ::-1]  # = np.flipud(x)
 
-            # import matplotlib.pyplot as plt
+            import matplotlib.pyplot as plt
+            plt.hist(i,60)
             # for pi in range(16):
             #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50])
             # for pi in range(16):
@@ -300,6 +306,8 @@ def main(model):
                 vS += torch.bincount(y, minlength=60)
                 vC += torch.bincount(y, minlength=60, weights=correct).float()
 
+        print(vS)
+        print(vC)
         accuracy = vC / vS.float()
         return loss_cum.detach().cpu(), accuracy.detach().cpu()
 
