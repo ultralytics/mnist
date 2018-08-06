@@ -74,7 +74,7 @@ class ConvNeta(nn.Module):
 class ConvNetb(nn.Module):
     def __init__(self, num_classes=60):
         super(ConvNetb, self).__init__()
-        n = 64  # initial convolution size
+        n = 32  # initial convolution size
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
