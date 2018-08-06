@@ -187,8 +187,25 @@ def main(model):
 
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=5e-4)
 
+    # Split data into train and test groups
     weights = xview_class_weights(range(60))[Y].numpy()
     weights /= weights.sum()
+
+    ind = []
+    nS = len(Y)
+    for i in range(60):
+        n = (Y == i).sum()
+        ind.extend(np.random.choice(nS, size=int(n * 0.1), p=weights))
+
+    mask = np.zeros(nS)
+    mask[ind] = 1
+    mask = mask == 1
+    X_test, Y_test = X[mask], Y[mask]
+    X, Y = X[~mask], Y[~mask]
+
+    weights = xview_class_weights(range(60))[Y].numpy()
+    weights /= weights.sum()
+
     criteria = nn.CrossEntropyLoss()  # weight=xview_class_weights(range(60)).to(device))
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
     modelinfo(model)
@@ -196,7 +213,6 @@ def main(model):
     border = 32
     shape = X.shape[1:3]
 
-    # @profile
     def train(model):
         vC = torch.zeros(60).to(device)  # vector correct
         vS = torch.zeros(60).long().to(device)  # vecgtor samples
@@ -237,7 +253,7 @@ def main(model):
                                   shape=shape)
 
                 x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR)
-                                           # borderValue=[60.134, 49.697, 40.746])  # RGB
+                # borderValue=[60.134, 49.697, 40.746])  # RGB
 
                 if random.random() > 0.5:
                     x[j] = x[j, :, ::-1]  # = np.flipud(x)
@@ -287,9 +303,43 @@ def main(model):
         accuracy = vC / vS.float()
         return loss_cum.detach().cpu(), accuracy.detach().cpu()
 
+    def test(model):
+        vC = torch.zeros(60).to(device)  # vector correct
+        vS = torch.zeros(60).long().to(device)  # vecgtor samples
+        loss_cum = torch.FloatTensor([0]).to(device)
+        nS = len(Y_test)
+        v = np.random.permutation(nS)
+        for batch in range(int(nS / batch_size)):
+            i = v[batch * batch_size:np.minimum((batch + 1) * batch_size, nS)]  # ordered chip selection
+            # i = np.random.choice(nS, size=batch_size, p=weights)  # weighted chip selection
+            x, y = X_test[i], Y_test[i]
+
+            x = x[:, border:-border, border:-border]
+            x = x.transpose([0, 3, 1, 2])  # cv2 to torch
+
+            x = np.ascontiguousarray(x)
+            x = torch.from_numpy(x).to(device).float()
+            y = torch.from_numpy(y).to(device).long()
+
+            x -= rgb_mean
+            x /= rgb_std
+
+            with torch.no_grad():
+                yhat = model(x)
+                loss = criteria(yhat, y)
+
+                loss_cum += loss.data
+                correct = y == torch.argmax(yhat.data, 1)
+                vS += torch.bincount(y, minlength=60)
+                vC += torch.bincount(y, minlength=60, weights=correct).float()
+
+        accuracy = vC / vS.float()
+        return loss_cum.detach().cpu(), accuracy.detach().cpu()
+
     for epoch in range(epochs):
         epoch += start_epoch
         loss, accuracy = train(model.train())
+        loss_test, accuracy_test = test(model.eval())
 
         # Save best checkpoint
         if (epoch > 0) & (loss.item() < best_loss):
@@ -301,7 +351,7 @@ def main(model):
                         'optimizer': optimizer.state_dict()},
                        opt.run_name)
 
-        if stopper.step(loss, metrics=(*accuracy.mean().view(1),), model=model):
+        if stopper.step(loss, metrics=(*accuracy.mean().view(1), loss_test, *accuracy_test.mean().view(1),), model=model):
             break
 
 
