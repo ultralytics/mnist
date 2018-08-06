@@ -211,7 +211,6 @@ def main(model):
         nS = len(Y)
         # v = np.random.permutation(nS)
         for batch in range(int(nS / batch_size)):
-            print(batch)
             # i = v[batch * batch_size:(batch + 1) * batch_size]  # ordered chip selection
             i = np.random.choice(nS, size=batch_size, p=weights)  # weighted chip selection
             x, y = X[i], Y[i]
