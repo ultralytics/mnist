@@ -126,8 +126,8 @@ def main(model):
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
 
-    # rgb_mean = torch.FloatTensor([60.134, 49.697, 40.746]).view((1, 3, 1, 1)).to(device)
-    # rgb_std = torch.FloatTensor([29.99, 24.498, 22.046]).view((1, 3, 1, 1)).to(device)
+    rgb_mean = torch.FloatTensor([60.134, 49.697, 40.746]).view((1, 3, 1, 1)).to(device)
+    rgb_std = torch.FloatTensor([29.99, 24.498, 22.046]).view((1, 3, 1, 1)).to(device)
 
     np.random.seed(0)
     torch.manual_seed(0)
@@ -250,10 +250,10 @@ def main(model):
 
             x = x[:, border:-border, border:-border]
 
-            for j in range(batch_size):
-                img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
-                img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
-                cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
+            # for j in range(batch_size):
+            #     img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
+            #     img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
+            #     cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
@@ -268,8 +268,8 @@ def main(model):
             x = torch.from_numpy(x).to(device).float()
             y = torch.from_numpy(y).to(device).long()
 
-            # x -= rgb_mean
-            # x /= rgb_std
+            x -= rgb_mean
+            x /= rgb_std
 
             yhat = model(x)
             loss = criteria(yhat, y)
