@@ -204,12 +204,6 @@ def main(model):
     X, Y, weights = X[~mask], Y[~mask], weights[~mask]
     weights /= weights.sum()
 
-    # X = np.ascontiguousarray(X)
-    # Y = np.ascontiguousarray(Y.ravel())
-    #
-    # X_test = np.ascontiguousarray(X_test)
-    # Y_test = np.ascontiguousarray(Y_test.ravel())
-
     criteria = nn.CrossEntropyLoss()  # weight=xview_class_weights(range(60)).to(device))
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
     modelinfo(model)
@@ -305,8 +299,6 @@ def main(model):
                 vS += torch.bincount(y, minlength=60)
                 vC += torch.bincount(y, minlength=60, weights=correct).float()
 
-        print(vS)
-        print(vC)
         accuracy = vC / vS.float()
         return loss_cum.detach().cpu(), accuracy.detach().cpu()
 
