@@ -16,6 +16,7 @@ parser.add_argument('-h5_name', default='../chips_10pad_square.h5', help='h5 fil
 parser.add_argument('-run_name', default='10pad_6ReLU_fullyconnected.pt', help='run name')
 parser.add_argument('-resume', default=False, help='resume training flag')
 opt = parser.parse_args()
+print(opt)
 
 torch.set_printoptions(linewidth=320, precision=8)
 np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
@@ -174,7 +175,7 @@ def main(model):
         model = model.to(device).train()
 
         # Set optimizer
-        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, weight_decay=5e-4)
         optimizer.load_state_dict(checkpoint['optimizer'])
 
         start_epoch = checkpoint['epoch'] + 1
@@ -208,47 +209,68 @@ def main(model):
         loss_cum = torch.FloatTensor([0]).to(device)
         nS = len(Y)
         # v = np.random.permutation(nS)
-        for batch in range(int(nS / batch_size)):
+        for batch in range(int(nS / 25)):
             # i = v[batch * batch_size:(batch + 1) * batch_size]  # ordered chip selection
             i = np.random.choice(nS, size=batch_size, p=weights)  # weighted chip selection
             x, y = X[i], Y[i]
 
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
             for j in range(batch_size):
-                M = random_affine(degrees=(-179.9, 179.9), translate=(.15, .15), scale=(.6, 1.40), shear=(-5, 5),
+
+                augment_hsv = True
+                if augment_hsv:
+                    # SV augmentation by 50%
+                    fraction = 0.50
+                    img_hsv = cv2.cvtColor(x[j], cv2.COLOR_BGR2HSV)
+                    S = img_hsv[:, :, 1].astype(np.float32)
+                    V = img_hsv[:, :, 2].astype(np.float32)
+
+                    a = (random.random() * 2 - 1) * fraction + 1
+                    S *= a
+                    if a > 1:
+                        np.clip(S, a_min=0, a_max=255, out=S)
+
+                    a = (random.random() * 2 - 1) * fraction + 1
+                    V *= a
+                    if a > 1:
+                        np.clip(V, a_min=0, a_max=255, out=V)
+
+                    img_hsv[:, :, 1] = S.astype(np.uint8)
+                    img_hsv[:, :, 2] = V.astype(np.uint8)
+                    cv2.cvtColor(img_hsv, cv2.COLOR_HSV2BGR, dst=x[j])
+
+                M = random_affine(degrees=(-179.9, 179.9), translate=(.15, .15), scale=(.7, 1.40), shear=(-3, 3),
                                   shape=shape)
 
-                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
-                                           borderValue=[60.134, 49.697, 40.746])  # RGB
+                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR)  # ,
+                # borderValue=[60.134, 49.697, 40.746])  # RGB
+
+                if random.random() > 0.5:
+                    x[j] = x[j, :, ::-1]  # = np.flipud(x)
 
             # import matplotlib.pyplot as plt
             # for pi in range(16):
             #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50])
             # for pi in range(16):
-            #    plt.subplot(4, 4, pi + 1).imshow(x[pi + 50, border:height - border, border:height - border])
+            #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50, border:-border, border:-border])
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
-            x = x[:, :, border:height - border, border:height - border]
+            x = x[:, :, border:-border, border:-border]
 
             # if random.random() > 0.25:
             #     np.rot90(x, k=np.random.choice([1, 2, 3]), axes=(2, 3))
             # if random.random() > 0.5:
             #     x = x[:, :, :, ::-1]  # = np.fliplr(x)
-            if random.random() > 0.5:
-                x = x[:, :, ::-1, :]  # = np.flipud(x)
-
-            # 596154x3x64x64
-            # x_shift = int(np.clip(random.gauss(8, 3), a_min=0, a_max=16) + 0.5)
-            # y_shift = int(np.clip(random.gauss(8, 3), a_min=0, a_max=16) + 0.5)
-            # x = x[:, :, y_shift:y_shift + 48, x_shift:x_shift + 48]
+            # if random.random() > 0.5:
+            #    x = x[:, :, ::-1, :]  # = np.flipud(x)
 
             x = np.ascontiguousarray(x)
             x = torch.from_numpy(x).to(device).float()
             y = torch.from_numpy(y).to(device).long()
 
-            x -= rgb_mean
-            x /= rgb_std
+            # x -= rgb_mean
+            # x /= rgb_std
 
             yhat = model(x)
             loss = criteria(yhat, y)
@@ -564,7 +586,7 @@ if __name__ == '__main__':
 #            8      106.97         356     0.58147
 #            9      107.19      341.74     0.59599
 
-# 20% square normal ReLU, Fully Convolutional
+# 20% square ReLU, Fully Convolutional
 # epoch        time        loss   metric(s)
 #            0      109.12      733.68     0.23079
 #            1      107.11      572.85     0.36909
