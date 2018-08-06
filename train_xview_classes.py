@@ -236,55 +236,55 @@ def main(model):
                 M = random_affine(degrees=(-179.9, 179.9), translate=(.15, .15), scale=(.75, 1.40), shear=(-3, 3),
                                   shape=shape)
 
-                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR)  # ,
-                # borderValue=[60.134, 49.697, 40.746])  # RGB
+                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
+                                           borderValue=[60.134, 49.697, 40.746])  # RGB
 
                 if random.random() > 0.5:
                     x[j] = x[j, :, ::-1]  # = np.flipud(x)
 
-            # import matplotlib.pyplot as plt
-            # for pi in range(16):
-            #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50])
-            # for pi in range(16):
-            #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50, border:-border, border:-border])
+                # import matplotlib.pyplot as plt
+                # for pi in range(16):
+                #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50])
+                # for pi in range(16):
+                #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50, border:-border, border:-border])
 
-            x = x[:, border:-border, border:-border]
+                x = x[:, border:-border, border:-border]
 
-            # for j in range(batch_size):
-            #     img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
-            #     img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
-            #     cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
+                # for j in range(batch_size):
+                #     img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
+                #     img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
+                #     cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
 
-            x = x.transpose([0, 3, 1, 2])  # cv2 to torch
+                x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
-            # if random.random() > 0.25:
-            #     np.rot90(x, k=np.random.choice([1, 2, 3]), axes=(2, 3))
-            # if random.random() > 0.5:
-            #     x = x[:, :, :, ::-1]  # = np.fliplr(x)
-            # if random.random() > 0.5:
-            #    x = x[:, :, ::-1, :]  # = np.flipud(x)
+                # if random.random() > 0.25:
+                #     np.rot90(x, k=np.random.choice([1, 2, 3]), axes=(2, 3))
+                # if random.random() > 0.5:
+                #     x = x[:, :, :, ::-1]  # = np.fliplr(x)
+                # if random.random() > 0.5:
+                #    x = x[:, :, ::-1, :]  # = np.flipud(x)
 
-            x = np.ascontiguousarray(x)
-            x = torch.from_numpy(x).to(device).float()
-            y = torch.from_numpy(y).to(device).long()
+                x = np.ascontiguousarray(x)
+                x = torch.from_numpy(x).to(device).float()
+                y = torch.from_numpy(y).to(device).long()
 
-            # x -= rgb_mean
-            # x /= rgb_std
+                x -= rgb_mean
+                x /= rgb_std
 
-            yhat = model(x)
-            loss = criteria(yhat, y)
+                yhat = model(x)
+                loss = criteria(yhat, y)
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
-            with torch.no_grad():
-                loss_cum += loss.data
+                with torch.no_grad():
+                    loss_cum += loss.data
                 correct = y == torch.argmax(yhat.data, 1)
                 vS += torch.bincount(y, minlength=60)
                 vC += torch.bincount(y, minlength=60, weights=correct).float()
 
-        accuracy = vC / vS.float()
+                accuracy = vC / vS.float()
         return loss_cum.detach().cpu(), accuracy.detach().cpu()
 
     for epoch in range(epochs):
