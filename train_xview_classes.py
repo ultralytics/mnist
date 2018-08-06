@@ -102,7 +102,7 @@ class ConvNetb(nn.Module):
         # self.layer7 = nn.Sequential(
         #     nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
         #     nn.BatchNorm2d(n * 64),
-        #     nn.ReLU())
+        #     nn.LeakyReLU())
 
         # self.fc = nn.Linear(int(8192), num_classes)  # 64 pixels, 4 layer, 64 filters
         self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)
