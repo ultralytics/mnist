@@ -99,10 +99,6 @@ class ConvNetb(nn.Module):
         #     nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
         #     nn.BatchNorm2d(n * 32),
         #     nn.LeakyReLU())
-        # self.layer7 = nn.Sequential(
-        #     nn.Conv2d(n * 32, n * 64, kernel_size=3, stride=2, padding=1, bias=False),
-        #     nn.BatchNorm2d(n * 64),
-        #     nn.LeakyReLU())
 
         # self.fc = nn.Linear(int(8192), num_classes)  # 64 pixels, 4 layer, 64 filters
         self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)
@@ -114,7 +110,6 @@ class ConvNetb(nn.Module):
         x = self.layer4(x)
         x = self.layer5(x)
         # x = self.layer6(x)
-        # x = self.layer7(x)
         # x = self.fc(x.reshape(x.size(0), -1))
         x = self.fully_convolutional(x)
         return x.squeeze()  # 500 x 60
@@ -131,8 +126,8 @@ def main(model):
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
 
-    rgb_mean = torch.FloatTensor([60.134, 49.697, 40.746]).view((1, 3, 1, 1)).to(device)
-    rgb_std = torch.FloatTensor([29.99, 24.498, 22.046]).view((1, 3, 1, 1)).to(device)
+    # rgb_mean = torch.FloatTensor([60.134, 49.697, 40.746]).view((1, 3, 1, 1)).to(device)
+    # rgb_std = torch.FloatTensor([29.99, 24.498, 22.046]).view((1, 3, 1, 1)).to(device)
 
     np.random.seed(0)
     torch.manual_seed(0)
@@ -196,13 +191,11 @@ def main(model):
     weights /= weights.sum()
     criteria = nn.CrossEntropyLoss()  # weight=xview_class_weights(range(60)).to(device))
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
+    modelinfo(model)
 
     border = 32
     shape = X.shape[1:3]
-    height = shape[0]
 
-    modelinfo(model)
-    
     # @profile
     def train(model):
         vC = torch.zeros(60).to(device)  # vector correct
@@ -257,10 +250,10 @@ def main(model):
 
             x = x[:, border:-border, border:-border]
 
-            # for j in range(batch_size):
-            #     img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
-            #     img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
-            #     cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
+            for j in range(batch_size):
+                img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
+                img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
+                cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
