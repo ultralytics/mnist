@@ -203,11 +203,11 @@ def main(model):
     X_test, Y_test = X[mask], Y[mask]
     X, Y = X[~mask], Y[~mask]
 
-    X = np.ascontiguousarray(X)
-    Y = np.ascontiguousarray(Y.ravel())
-
-    X_test = np.ascontiguousarray(X_test)
-    Y_test = np.ascontiguousarray(Y_test.ravel())
+    # X = np.ascontiguousarray(X)
+    # Y = np.ascontiguousarray(Y.ravel())
+    #
+    # X_test = np.ascontiguousarray(X_test)
+    # Y_test = np.ascontiguousarray(Y_test.ravel())
 
     weights = xview_class_weights(range(60))[Y].numpy()
     weights /= weights.sum()
