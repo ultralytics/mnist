@@ -222,7 +222,7 @@ def main(model):
                 if augment_hsv:
                     # SV augmentation by 50%
                     fraction = 0.50
-                    img_hsv = cv2.cvtColor(x[j], cv2.COLOR_BGR2HSV)
+                    img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
                     S = img_hsv[:, :, 1].astype(np.float32)
                     V = img_hsv[:, :, 2].astype(np.float32)
 
@@ -238,7 +238,7 @@ def main(model):
 
                     img_hsv[:, :, 1] = S.astype(np.uint8)
                     img_hsv[:, :, 2] = V.astype(np.uint8)
-                    cv2.cvtColor(img_hsv, cv2.COLOR_HSV2BGR, dst=x[j])
+                    cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
 
                 M = random_affine(degrees=(-179.9, 179.9), translate=(.15, .15), scale=(.75, 1.40), shear=(-3, 3),
                                   shape=shape)
@@ -256,6 +256,12 @@ def main(model):
             #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50, border:-border, border:-border])
 
             x = x[:, border:-border, border:-border]
+
+            # for j in range(batch_size):
+            #     img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
+            #     img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
+            #     cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
+
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
             # if random.random() > 0.25:
