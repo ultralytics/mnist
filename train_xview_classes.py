@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 from utils import *
 
-# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '10pad_32f_6leaky.pt'
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-h5_name', default='../chips_10pad_square.h5', help='h5 filename')
