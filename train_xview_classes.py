@@ -263,8 +263,8 @@ def main(model):
                 if random.random() > 0.5:
                     x[j] = x[j, :, ::-1]  # = np.flipud(x)
 
-            import matplotlib.pyplot as plt
-            plt.hist(i,60)
+            #import matplotlib.pyplot as plt
+            #plt.hist(i,60)
             # for pi in range(16):
             #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50])
             # for pi in range(16):
