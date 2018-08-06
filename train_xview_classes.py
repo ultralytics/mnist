@@ -9,11 +9,11 @@ import torch.nn.functional as F
 
 from utils import *
 
-# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt'
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt' -resume 1
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-h5_name', default='../chips_10pad_square.h5', help='h5 filename')
-parser.add_argument('-run_name', default='10pad_6ReLU_fullyconnected.pt', help='run name')
+parser.add_argument('-run_name', default='10pad_64f_5leaky.pt', help='run name')
 parser.add_argument('-resume', default=False, help='resume training flag')
 opt = parser.parse_args()
 print(opt)
