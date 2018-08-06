@@ -185,7 +185,7 @@ def main(model):
         else:
             model = model.to(device).train()
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=5e-4)
 
     weights = xview_class_weights(range(60))[Y].numpy()
     weights /= weights.sum()
