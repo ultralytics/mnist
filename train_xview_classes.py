@@ -196,21 +196,20 @@ def main(model):
     nS = len(Y)
     mask = np.zeros(nS)
     for i in range(60):
-        n = (Y == i).sum()
-        mask[np.random.choice(nS, size=int(n * 0.1), p=weights)] = 1
+        j = np.nonzero(Y == i)[0]
+        n = len(j)
+        mask[j[np.random.choice(n, size=int(n * 0.1), replace=False)]] = 1
 
     mask = mask == 1
-    X_test, Y_test = X[mask], Y[mask]
-    X, Y = X[~mask], Y[~mask]
+    X_test, Y_test = X[mask].copy(), Y[mask].copy()
+    X, Y, weights = X[~mask], Y[~mask], weights[~mask]
+    weights /= weights.sum()
 
     # X = np.ascontiguousarray(X)
     # Y = np.ascontiguousarray(Y.ravel())
     #
     # X_test = np.ascontiguousarray(X_test)
     # Y_test = np.ascontiguousarray(Y_test.ravel())
-
-    weights = xview_class_weights(range(60))[Y].numpy()
-    weights /= weights.sum()
 
     criteria = nn.CrossEntropyLoss()  # weight=xview_class_weights(range(60)).to(device))
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
@@ -264,8 +263,8 @@ def main(model):
                 if random.random() > 0.5:
                     x[j] = x[j, :, ::-1]  # = np.flipud(x)
 
-            #import matplotlib.pyplot as plt
-            #plt.hist(i,60)
+            import matplotlib.pyplot as plt
+            plt.hist(i,60)
             # for pi in range(16):
             #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50])
             # for pi in range(16):
