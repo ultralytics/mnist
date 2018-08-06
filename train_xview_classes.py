@@ -202,7 +202,8 @@ def main(model):
     height = shape[0]
 
     modelinfo(model)
-
+    
+    # @profile
     def train(model):
         vC = torch.zeros(60).to(device)  # vector correct
         vS = torch.zeros(60).long().to(device)  # vecgtor samples
@@ -271,6 +272,8 @@ def main(model):
 
             # x -= rgb_mean
             # x /= rgb_std
+
+            continue
 
             yhat = model(x)
             loss = criteria(yhat, y)
