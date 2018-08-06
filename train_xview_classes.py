@@ -191,14 +191,14 @@ def main(model):
     weights = xview_class_weights(range(60))[Y].numpy()
     weights /= weights.sum()
 
-    ind = []
+
     nS = len(Y)
+    mask = np.zeros(nS)
     for i in range(60):
         n = (Y == i).sum()
-        ind.extend(np.random.choice(nS, size=int(n * 0.1), p=weights))
+        j = np.random.choice(nS, size=int(n * 0.1), p=weights)
+        mask[j] = 1
 
-    mask = np.zeros(nS)
-    mask[ind] = 1
     mask = mask == 1
     X_test, Y_test = X[mask], Y[mask]
     X, Y = X[~mask], Y[~mask]
