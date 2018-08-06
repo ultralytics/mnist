@@ -236,8 +236,8 @@ def main(model):
                 M = random_affine(degrees=(-179.9, 179.9), translate=(.15, .15), scale=(.75, 1.40), shear=(-3, 3),
                                   shape=shape)
 
-                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR)  # ,
-                # borderValue=[60.134, 49.697, 40.746])  # RGB
+                x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR,
+                                           borderValue=[60.134, 49.697, 40.746])  # RGB
 
                 if random.random() > 0.5:
                     x[j] = x[j, :, ::-1]  # = np.flipud(x)
