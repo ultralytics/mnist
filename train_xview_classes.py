@@ -227,7 +227,7 @@ def main(model):
         # v = np.random.permutation(nS)
         for batch in range(int(nS / batch_size)):
             # i = v[batch * batch_size:(batch + 1) * batch_size]  # ordered chip selection
-            i = np.random.choice(nS, size=batch_size*100, p=weights)  # weighted chip selection
+            i = np.random.choice(nS, size=batch_size, p=weights)  # weighted chip selection
             x, y = X[i], Y[i]
 
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
