@@ -192,7 +192,6 @@ def main(model):
     weights = xview_class_weights(range(60))[Y].numpy()
     weights /= weights.sum()
 
-
     nS = len(Y)
     mask = np.zeros(nS)
     for i in range(60):
@@ -263,8 +262,8 @@ def main(model):
                 if random.random() > 0.5:
                     x[j] = x[j, :, ::-1]  # = np.flipud(x)
 
-            import matplotlib.pyplot as plt
-            plt.hist(i,60)
+            # import matplotlib.pyplot as plt
+            # plt.hist(i,60)
             # for pi in range(16):
             #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50])
             # for pi in range(16):
@@ -359,7 +358,8 @@ def main(model):
                         'optimizer': optimizer.state_dict()},
                        opt.run_name)
 
-        if stopper.step(loss, metrics=(*accuracy.mean().view(1), loss_test, *accuracy_test.mean().view(1),), model=model):
+        if stopper.step(loss, metrics=(*accuracy.mean().view(1), loss_test, *accuracy_test.mean().view(1),),
+                        model=model):
             break
 
 
