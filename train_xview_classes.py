@@ -35,46 +35,7 @@ def xview_class_weights(indices):  # weights of each class in the training set, 
     return weights[indices]
 
 
-# Epoch 25: 98.60% test accuracy, 0.0555 test loss (normalize after relu)
-# Epoch 11: 98.48% test accuracy, 0.0551 test loss (normalize after both)
-class MLP(nn.Module):
-    def __init__(self):
-        super(MLP, self).__init__()
-        self.fc1 = nn.Linear(784, 500, bias=True)
-        self.fc2 = nn.Linear(500, 10, bias=True)
-
-    def forward(self, x):
-        x = x.view(-1, 28 * 28)
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.fc2(x)
-        return x
-
-
-# 178  9.2745e-05    0.024801        99.2 default no augmentation
-class ConvNeta(nn.Module):
-    def __init__(self):
-        super(ConvNeta, self).__init__()
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
-        self.fc1 = nn.Linear(320, 50)
-        self.fc2 = nn.Linear(50, 10)
-
-    def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 320)
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        x = self.fc2(x)
-        return x
-
-
 # https://github.com/yunjey/pytorch-tutorial/tree/master/tutorials/02-intermediate
-# 8    0.00023365    0.025934       99.14  default no augmentation
-# 124      14.438    0.012876       99.55  LeakyReLU in place of ReLU
-# 190  0.00059581    0.013831       99.58  default
 class ConvNetb(nn.Module):
     def __init__(self, num_classes=60):
         super(ConvNetb, self).__init__()
