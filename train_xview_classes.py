@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from utils import *
 
 # Start New Training
-# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky_noSVaug.pt'
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_6leaky.pt'
 
 # Resume Training
 # cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt' -resume 1
@@ -60,10 +60,10 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
             nn.LeakyReLU())
-        # self.layer6 = nn.Sequential(
-        #     nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
-        #     nn.BatchNorm2d(n * 32),
-        #     nn.LeakyReLU())
+        self.layer6 = nn.Sequential(
+            nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(n * 32),
+            nn.LeakyReLU())
 
         # self.fc = nn.Linear(int(8192), num_classes)  # 64 pixels, 4 layer, 64 filters
         self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)
@@ -74,7 +74,7 @@ class ConvNetb(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.layer5(x)
-        # x = self.layer6(x)
+        x = self.layer6(x)
         # x = self.fc(x.reshape(x.size(0), -1))
         x = self.fully_convolutional(x)
         return x.squeeze()  # 500 x 60
@@ -195,7 +195,7 @@ def main(model):
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
             for j in range(batch_size):
 
-                augment_hsv = False
+                augment_hsv = True
                 if augment_hsv:
                     # SV augmentation by 50%
                     fraction = 0.50
