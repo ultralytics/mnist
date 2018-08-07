@@ -66,7 +66,8 @@ class ConvNetb(nn.Module):
             nn.LeakyReLU())
 
         # self.fc = nn.Linear(int(8192), num_classes)  # 64 pixels, 4 layer, 64 filters
-        self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)
+        # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer
+        self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
 
     def forward(self, x):  # 500 x 1 x 64 x 64
         x = self.layer1(x)
