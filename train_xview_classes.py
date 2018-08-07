@@ -229,7 +229,7 @@ def main(model):
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
             for j in range(batch_size):
 
-                augment_hsv = True
+                augment_hsv = False
                 if augment_hsv:
                     # SV augmentation by 50%
                     fraction = 0.50
