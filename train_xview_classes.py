@@ -260,7 +260,7 @@ def main(model):
             x /= rgb_std
 
             yhat = model(x)
-            print(yhat.shape)
+            # print(yhat.shape)
             loss = criteria(yhat, y)
 
             optimizer.zero_grad()
