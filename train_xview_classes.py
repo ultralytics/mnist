@@ -41,7 +41,7 @@ class ConvNetb(nn.Module):
         super(ConvNetb, self).__init__()
         n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(3, n, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n),
             nn.LeakyReLU())
         self.layer2 = nn.Sequential(
@@ -60,14 +60,15 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
             nn.LeakyReLU())
-        self.layer6 = nn.Sequential(
-            nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(n * 32),
-            nn.LeakyReLU())
+        # self.layer6 = nn.Sequential(
+        #     nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
+        #     nn.BatchNorm2d(n * 32),
+        #     nn.LeakyReLU())
 
-        # self.fc = nn.Linear(int(8192), num_classes)  # 64 pixels, 4 layer, 64 filters
-        # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer
-        self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
+        # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
+        self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s2
+        # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
+        # self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
 
     def forward(self, x):  # 500 x 1 x 64 x 64
         x = self.layer1(x)
@@ -75,7 +76,7 @@ class ConvNetb(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.layer5(x)
-        x = self.layer6(x)
+        # x = self.layer6(x)
         # x = self.fc(x.reshape(x.size(0), -1))
         x = self.fully_convolutional(x)
         return x.squeeze()  # 500 x 60
@@ -259,6 +260,7 @@ def main(model):
             x /= rgb_std
 
             yhat = model(x)
+            print(yhat.shape)
             loss = criteria(yhat, y)
 
             optimizer.zero_grad()
