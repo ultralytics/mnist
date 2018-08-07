@@ -130,11 +130,15 @@ def main(model):
     # Load saved model
     start_epoch = 0
     best_loss = float('inf')
+    nGPU = torch.cuda.device_count()
     if opt.resume:
         checkpoint = torch.load(opt.run_name, map_location='cuda:0' if cuda else 'cpu')
 
         model.load_state_dict(checkpoint['model'])
-        model = model.to(device).train()
+        if nGPU > 1:
+            print('%g GPUs found.' % nGPU)
+            model = nn.DataParallel(model)
+        model.to(device).train()
 
         # Set optimizer
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, weight_decay=5e-4)
@@ -144,13 +148,10 @@ def main(model):
         best_loss = checkpoint['best_loss']
         del checkpoint
     else:
-        nGPU = torch.cuda.device_count()
         if nGPU > 1:
             print('%g GPUs found.' % nGPU)
             model = nn.DataParallel(model)
-            model.to(device).train()
-        else:
-            model = model.to(device).train()
+        model.to(device).train()
 
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=5e-4)
 
