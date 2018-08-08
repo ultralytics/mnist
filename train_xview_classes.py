@@ -41,7 +41,7 @@ class ConvNetb(nn.Module):
         super(ConvNetb, self).__init__()
         n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
-            nn.Conv2d(9, n, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
             nn.LeakyReLU())
         self.layer2 = nn.Sequential(
@@ -239,13 +239,6 @@ def main(model):
 
             x = x[:, border:-border, border:-border]
 
-            x2 = x.copy()
-            x3 = x.copy()
-            for j in range(batch_size):
-                cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV, dst=x2[j])
-                cv2.cvtColor(x[j], cv2.COLOR_RGB2YUV, dst=x3[j])
-            x = np.concatenate((x, x2, x3), 3)
-
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
             # if random.random() > 0.25:
@@ -259,8 +252,8 @@ def main(model):
             x = torch.from_numpy(x).to(device).float()
             y = torch.from_numpy(y).to(device).long()
 
-            # x -= rgb_mean
-            # x /= rgb_std
+            x -= rgb_mean
+            x /= rgb_std
 
             yhat = model(x)
             # print(yhat.shape)
@@ -292,21 +285,14 @@ def main(model):
 
             x = x[:, border:-border, border:-border]
 
-            x2 = x.copy()
-            x3 = x.copy()
-            for j in range(batch_size):
-                cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV, dst=x2[j])
-                cv2.cvtColor(x[j], cv2.COLOR_RGB2YUV, dst=x3[j])
-            x = np.concatenate((x, x2, x3), 3)
-
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
             x = np.ascontiguousarray(x)
             x = torch.from_numpy(x).to(device).float()
             y = torch.from_numpy(y).to(device).long()
 
-            # x -= rgb_mean
-            # x /= rgb_std
+            x -= rgb_mean
+            x /= rgb_std
 
             with torch.no_grad():
                 yhat = model(x)
