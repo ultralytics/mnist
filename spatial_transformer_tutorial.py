@@ -155,7 +155,7 @@ modelinfo(model)
 # the model is learning STN automatically in an end-to-end fashion.
 
 
-optimizer = optim.SGD(model.parameters(), lr=0.01)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 
 def train(epoch):
@@ -245,11 +245,11 @@ def visualize_stn():
         axarr[1].set_title('Transformed Images')
 
 
-for epoch in range(1, 30 + 1):
+for epoch in range(1, 20 + 1):
     train(epoch)
     test()
 
-# Visualize the STN transformation on some input batch
+# Visualize the STN transformation on some input batchcd ..
 visualize_stn()
 
 plt.ioff()
