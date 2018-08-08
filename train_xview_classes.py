@@ -93,9 +93,7 @@ class ConvNetb(nn.Module):
 
     # Spatial transformer network forward function
     def stn(self, x):
-        print(x.shape)
         xs = self.localization(x)
-        print(xs.shape)
 
         xs = xs.view(-1, 10 * 12 * 12)
         theta = self.fc_loc(xs)
