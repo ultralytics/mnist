@@ -39,9 +39,9 @@ def xview_class_weights(indices):  # weights of each class in the training set, 
 class ConvNetb(nn.Module):
     def __init__(self, num_classes=60):
         super(ConvNetb, self).__init__()
-        n = 128  # initial convolution size
+        n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(3, n, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n),
             nn.LeakyReLU())
         self.layer2 = nn.Sequential(
@@ -66,8 +66,8 @@ class ConvNetb(nn.Module):
         #     nn.LeakyReLU())
 
         # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
-        # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s2
-        self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
+        self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s2
+        # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
         # self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
 
     def forward(self, x):  # 500 x 1 x 64 x 64
