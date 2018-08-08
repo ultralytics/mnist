@@ -244,7 +244,7 @@ def main(model):
             for j in range(batch_size):
                 cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV, dst=x2[j])
                 cv2.cvtColor(x[j], cv2.COLOR_RGB2YUV, dst=x3[j])
-            x = np.cat((x, x2, x3), 3)
+            x = np.concatenate((x, x2, x3), 3)
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
@@ -297,7 +297,7 @@ def main(model):
             for j in range(batch_size):
                 cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV, dst=x2[j])
                 cv2.cvtColor(x[j], cv2.COLOR_RGB2YUV, dst=x3[j])
-            x = np.cat((x, x2, x3), 3)
+            x = np.concatenate((x, x2, x3), 3)
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
