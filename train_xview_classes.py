@@ -247,7 +247,6 @@ def main(model):
             np.rot90(x1, k=1, axes=(1, 2))
             np.rot90(x2, k=2, axes=(1, 2))
             np.rot90(x3, k=3, axes=(1, 2))
-
             x = np.concatenate((x,x1,x2,x3),3)
 
             # for j in range(batch_size):
@@ -300,6 +299,15 @@ def main(model):
             x, y = X_test[i], Y_test[i]
 
             x = x[:, border:-border, border:-border]
+
+            x1 = x.copy()
+            x2 = x.copy()
+            x3 = x.copy()
+            np.rot90(x1, k=1, axes=(1, 2))
+            np.rot90(x2, k=2, axes=(1, 2))
+            np.rot90(x3, k=3, axes=(1, 2))
+            x = np.concatenate((x,x1,x2,x3),3)
+
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
             x = np.ascontiguousarray(x)
