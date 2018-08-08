@@ -85,7 +85,6 @@ class ConvNetb(nn.Module):
 
 # @profile
 def main(model):
-    lr = .0001
     epochs = 1000
     printerval = 1
     patience = 500
@@ -155,7 +154,7 @@ def main(model):
             model = nn.DataParallel(model)
         model.to(device).train()
 
-        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, weight_decay=5e-4)
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001, weight_decay=5e-4)
 
     # Split data into train and test groups
     weights = xview_class_weights(range(60))[Y].numpy()
