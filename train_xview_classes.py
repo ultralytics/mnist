@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from utils import *
 
 # Start New Training
-# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_6leaky.pt'
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt'
 
 # Resume Training
 # cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt' -resume 1
@@ -41,7 +41,7 @@ class ConvNetb(nn.Module):
         super(ConvNetb, self).__init__()
         n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(11, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
             nn.LeakyReLU())
         self.layer2 = nn.Sequential(
@@ -94,8 +94,8 @@ def main(model):
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
 
-    rgb_mean = torch.FloatTensor([60.134, 49.697, 40.746]).view((1, 3, 1, 1)).to(device)
-    rgb_std = torch.FloatTensor([29.99, 24.498, 22.046]).view((1, 3, 1, 1)).to(device)
+    rgb_mean = 55  # torch.FloatTensor([60.134, 49.697, 40.746]).view((1, 3, 1, 1)).to(device)
+    rgb_std = 37  # torch.FloatTensor([29.99, 24.498, 22.046]).view((1, 3, 1, 1)).to(device)
 
     np.random.seed(0)
     torch.manual_seed(0)
@@ -228,9 +228,7 @@ def main(model):
                 # borderValue=[60.134, 49.697, 40.746])  # RGB
 
                 if random.random() > 0.5:
-                    x[j] = x[j, :, ::-1]  # = np.flipud(x)
-
-
+                    x[j] = x[j, ::-1]  # = np.flipud(x)
 
             # import matplotlib.pyplot as plt
             # plt.hist(Y[i],60)
@@ -241,13 +239,12 @@ def main(model):
 
             x = x[:, border:-border, border:-border]
 
-            # x1 = x.copy()
-            # x2 = x.copy()
-            # x3 = x.copy()
-            # np.rot90(x1, k=1, axes=(1, 2))
-            # np.rot90(x2, k=2, axes=(1, 2))
-            # np.rot90(x3, k=3, axes=(1, 2))
-            # x = np.concatenate((x,x1,x2,x3),3)
+            xg = (x[:, :, :, 0] / 3 + x[:, :, :, 1] / 3 + x[:, :, :, 2] / 3).astype(np.uint8)[:, :, :, np.newaxis]
+            xf = xg[:, ::-1]
+            xg1, xf1 = np.rot90(xg, k=1, axes=(1, 2)), np.rot90(xf, k=1, axes=(1, 2))
+            xg2, xf2 = np.rot90(xg, k=2, axes=(1, 2)), np.rot90(xf, k=2, axes=(1, 2))
+            xg3, xf3 = np.rot90(xg, k=3, axes=(1, 2)), np.rot90(xf, k=3, axes=(1, 2))
+            x = np.concatenate((x, xg, xf, xg1, xf1, xg2, xf2, xg3, xf3), 3)
 
             # for j in range(batch_size):
             #     img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
@@ -267,8 +264,8 @@ def main(model):
             x = torch.from_numpy(x).to(device).float()
             y = torch.from_numpy(y).to(device).long()
 
-            x -= rgb_mean
-            x /= rgb_std
+            x[:, :3] -= rgb_mean
+            x[:, :3] /= rgb_std
 
             yhat = model(x)
             # print(yhat.shape)
@@ -300,13 +297,12 @@ def main(model):
 
             x = x[:, border:-border, border:-border]
 
-            # x1 = x.copy()
-            # x2 = x.copy()
-            # x3 = x.copy()
-            # np.rot90(x1, k=1, axes=(1, 2))
-            # np.rot90(x2, k=2, axes=(1, 2))
-            # np.rot90(x3, k=3, axes=(1, 2))
-            # x = np.concatenate((x,x1,x2,x3),3)
+            xg = (x[:, :, :, 0] / 3 + x[:, :, :, 1] / 3 + x[:, :, :, 2] / 3).astype(np.uint8)[:, :, :, np.newaxis]
+            xf = xg[:, ::-1]
+            xg1, xf1 = np.rot90(xg, k=1, axes=(1, 2)), np.rot90(xf, k=1, axes=(1, 2))
+            xg2, xf2 = np.rot90(xg, k=2, axes=(1, 2)), np.rot90(xf, k=2, axes=(1, 2))
+            xg3, xf3 = np.rot90(xg, k=3, axes=(1, 2)), np.rot90(xf, k=3, axes=(1, 2))
+            x = np.concatenate((x, xg, xf, xg1, xf1, xg2, xf2, xg3, xf3), 3)
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
@@ -335,11 +331,11 @@ def main(model):
         loss_test, accuracy_test = test(model.eval())
 
         # Save best checkpoint
-        if (epoch > 0) & (loss.item() < best_loss):
-            best_loss = loss.item()
+        if (epoch > 0) & (loss_test.item() < best_loss):
+            best_loss = loss_test.item()
             torch.save({'epoch': epoch,
                         'best_loss': best_loss,
-                        'accuracy': accuracy,
+                        'accuracy': accuracy_test,
                         'model': model.state_dict(),
                         'optimizer': optimizer.state_dict()},
                        opt.run_name)
