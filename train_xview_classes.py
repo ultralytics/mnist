@@ -187,7 +187,7 @@ def main(model):
 
     def train(model):
         vC = torch.zeros(60).to(device)  # vector correct
-        vS = torch.zeros(60).long().to(device)  # vecgtor samples
+        vS = torch.zeros(60).long().to(device)  # vector samples
         loss_cum = torch.FloatTensor([0]).to(device)
         nS = len(Y)
         # v = np.random.permutation(nS)
@@ -239,17 +239,12 @@ def main(model):
 
             x = x[:, border:-border, border:-border]
 
-            xg = (x[:, :, :, 0] / 3 + x[:, :, :, 1] / 3 + x[:, :, :, 2] / 3).astype(np.uint8)[:, :, :, np.newaxis]
-            xf = xg[:, ::-1]
-            xg1, xf1 = np.rot90(xg, k=1, axes=(1, 2)), np.rot90(xf, k=1, axes=(1, 2))
-            xg2, xf2 = np.rot90(xg, k=2, axes=(1, 2)), np.rot90(xf, k=2, axes=(1, 2))
-            xg3, xf3 = np.rot90(xg, k=3, axes=(1, 2)), np.rot90(xf, k=3, axes=(1, 2))
-            x = np.concatenate((x, xg, xf, xg1, xf1, xg2, xf2, xg3, xf3), 3)
-
-            # for j in range(batch_size):
-            #     img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
-            #     img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
-            #     cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
+            x2 = x.copy()
+            x3 = x.copy()
+            for j in range(batch_size):
+                cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV, dst=x2[j])
+                cv2.cvtColor(x[j], cv2.COLOR_RGB2YUV, dst=x3[j])
+            x = np.cat((x, x2, x3), 3)
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
@@ -264,8 +259,8 @@ def main(model):
             x = torch.from_numpy(x).to(device).float()
             y = torch.from_numpy(y).to(device).long()
 
-            x -= rgb_mean
-            x /= rgb_std
+            # x -= rgb_mean
+            # x /= rgb_std
 
             yhat = model(x)
             # print(yhat.shape)
@@ -286,7 +281,7 @@ def main(model):
 
     def test(model):
         vC = torch.zeros(60).to(device)  # vector correct
-        vS = torch.zeros(60).long().to(device)  # vecgtor samples
+        vS = torch.zeros(60).long().to(device)  # vector samples
         loss_cum = torch.FloatTensor([0]).to(device)
         nS = len(Y_test)
         v = np.random.permutation(nS)
@@ -297,12 +292,12 @@ def main(model):
 
             x = x[:, border:-border, border:-border]
 
-            xg = (x[:, :, :, 0] / 3 + x[:, :, :, 1] / 3 + x[:, :, :, 2] / 3).astype(np.uint8)[:, :, :, np.newaxis]
-            xf = xg[:, ::-1]
-            xg1, xf1 = np.rot90(xg, k=1, axes=(1, 2)), np.rot90(xf, k=1, axes=(1, 2))
-            xg2, xf2 = np.rot90(xg, k=2, axes=(1, 2)), np.rot90(xf, k=2, axes=(1, 2))
-            xg3, xf3 = np.rot90(xg, k=3, axes=(1, 2)), np.rot90(xf, k=3, axes=(1, 2))
-            x = np.concatenate((x, xg, xf, xg1, xf1, xg2, xf2, xg3, xf3), 3)
+            x2 = x.copy()
+            x3 = x.copy()
+            for j in range(batch_size):
+                cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV, dst=x2[j])
+                cv2.cvtColor(x[j], cv2.COLOR_RGB2YUV, dst=x3[j])
+            x = np.cat((x, x2, x3), 3)
 
             x = x.transpose([0, 3, 1, 2])  # cv2 to torch
 
@@ -310,8 +305,8 @@ def main(model):
             x = torch.from_numpy(x).to(device).float()
             y = torch.from_numpy(y).to(device).long()
 
-            x -= rgb_mean
-            x /= rgb_std
+            # x -= rgb_mean
+            # x /= rgb_std
 
             with torch.no_grad():
                 yhat = model(x)
