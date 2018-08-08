@@ -155,7 +155,7 @@ modelinfo(model)
 # the model is learning STN automatically in an end-to-end fashion.
 
 
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
 
 def train(epoch):
