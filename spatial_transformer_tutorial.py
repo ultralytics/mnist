@@ -100,18 +100,16 @@ class Net(nn.Module):
         self.localization = nn.Sequential(
             nn.Conv2d(1, 8, kernel_size=7),
             nn.MaxPool2d(2, stride=2),
-            nn.ReLU(True),
+            nn.ReLU(),
             nn.Conv2d(8, 10, kernel_size=5),
             nn.MaxPool2d(2, stride=2),
-            nn.ReLU(True)
-        )
+            nn.ReLU())
 
         # Regressor for the 3 * 2 affine matrix
         self.fc_loc = nn.Sequential(
             nn.Linear(10 * 3 * 3, 32),
-            nn.ReLU(True),
-            nn.Linear(32, 3 * 2)
-        )
+            nn.ReLU(),
+            nn.Linear(32, 3 * 2))
 
         # Initialize the weights/bias with identity transformation
         self.fc_loc[2].weight.data.zero_()
