@@ -36,6 +36,8 @@ from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 from utils import *
 
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 spatial_transformer_tutorial.py
+
 plt.ion()   # interactive mode
 
 ######################################################################
@@ -129,7 +131,7 @@ class Net(nn.Module):
 
     def forward(self, x):
         # transform the input
-        # x = self.stn(x)
+        x = self.stn(x)
 
         # Perform the usual forward pass
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
