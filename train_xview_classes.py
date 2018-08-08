@@ -41,7 +41,7 @@ class ConvNetb(nn.Module):
         super(ConvNetb, self).__init__()
         n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(12, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
             nn.LeakyReLU())
         self.layer2 = nn.Sequential(
@@ -230,6 +230,8 @@ def main(model):
                 if random.random() > 0.5:
                     x[j] = x[j, :, ::-1]  # = np.flipud(x)
 
+
+
             # import matplotlib.pyplot as plt
             # plt.hist(Y[i],60)
             # for pi in range(16):
@@ -238,6 +240,15 @@ def main(model):
             #     plt.subplot(4, 4, pi + 1).imshow(x[pi + 50, border:-border, border:-border])
 
             x = x[:, border:-border, border:-border]
+
+            x1 = x.copy()
+            x2 = x.copy()
+            x3 = x.copy()
+            np.rot90(x1, k=1, axes=(1, 2))
+            np.rot90(x2, k=2, axes=(1, 2))
+            np.rot90(x3, k=3, axes=(1, 2))
+
+            x = np.concatenate((x,x1,x2,x3),3)
 
             # for j in range(batch_size):
             #     img_hsv = cv2.cvtColor(x[j], cv2.COLOR_RGB2HSV)
