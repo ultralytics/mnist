@@ -267,8 +267,8 @@ def main(model):
             x = torch.from_numpy(x).to(device).float()
             y = torch.from_numpy(y).to(device).long()
 
-            x -= rgb_mean
-            x /= rgb_std
+            #x -= rgb_mean
+            #x /= rgb_std
 
             yhat = model(x)
             # print(yhat.shape)
@@ -314,8 +314,8 @@ def main(model):
             x = torch.from_numpy(x).to(device).float()
             y = torch.from_numpy(y).to(device).long()
 
-            x -= rgb_mean
-            x /= rgb_std
+            #x -= rgb_mean
+            #x /= rgb_std
 
             with torch.no_grad():
                 yhat = model(x)
