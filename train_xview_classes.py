@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from utils import *
 
 # Start New Training
-# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '11in_5leaky.pt'
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '5leaky.pt'
 
 # Resume Training
 # cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt' -resume 1
@@ -71,42 +71,7 @@ class ConvNetb(nn.Module):
         # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=8, stride=1, padding=0, bias=True)  # 5 layer s1s1
         # self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
 
-
-        # Spatial transformer localization-network
-        self.localization = nn.Sequential(
-            nn.Conv2d(3, 8, kernel_size=7),
-            nn.MaxPool2d(2, stride=2),
-            nn.ReLU(),
-            nn.Conv2d(8, 10, kernel_size=5),
-            nn.MaxPool2d(2, stride=2),
-            nn.ReLU())
-
-        # Regressor for the 3 * 2 affine matrix
-        self.fc_loc = nn.Sequential(
-            nn.Linear(10 * 12 * 12, 32),
-            nn.ReLU(),
-            nn.Linear(32, 3 * 2))
-
-        # Initialize the weights/bias with identity transformation
-        self.fc_loc[2].weight.data.zero_()
-        self.fc_loc[2].bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
-
-    # Spatial transformer network forward function
-    def stn(self, x):
-        xs = self.localization(x)
-
-        xs = xs.view(-1, 10 * 12 * 12)
-        theta = self.fc_loc(xs)
-        theta = theta.view(-1, 2, 3)
-
-        grid = F.affine_grid(theta, x.size())
-        x = F.grid_sample(x, grid)
-        return x
-
     def forward(self, x):  # 500 x 1 x 64 x 64
-        # transform the input
-        x = self.stn(x)
-
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
@@ -120,6 +85,7 @@ class ConvNetb(nn.Module):
 
 # @profile
 def main(model):
+    lr = .0001
     epochs = 1000
     printerval = 1
     patience = 500
@@ -189,7 +155,7 @@ def main(model):
             model = nn.DataParallel(model)
         model.to(device).train()
 
-        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001, weight_decay=5e-4)
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, weight_decay=5e-4)
 
     # Split data into train and test groups
     weights = xview_class_weights(range(60))[Y].numpy()

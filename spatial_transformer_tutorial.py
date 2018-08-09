@@ -84,7 +84,6 @@ test_loader = torch.utils.data.DataLoader(
 # .. Note::
 #    We need the latest version of PyTorch that contains
 #    affine_grid and grid_sample modules.
-#
 
 
 class Net(nn.Module):
@@ -98,8 +97,9 @@ class Net(nn.Module):
 
         # Spatial transformer localization-network
         self.localization = nn.Sequential(
-            nn.Conv2d(1, 8, kernel_size=7),
-            nn.MaxPool2d(2, stride=2),
+            # nn.Conv2d(1, 8, kernel_size=7),
+            # nn.MaxPool2d(2, stride=2),
+            nn.Conv2d(1, 8, kernel_size=7, stride=2),
             nn.ReLU(),
             nn.Conv2d(8, 10, kernel_size=5),
             nn.MaxPool2d(2, stride=2),
@@ -153,7 +153,7 @@ modelinfo(model)
 # the model is learning STN automatically in an end-to-end fashion.
 
 
-optimizer = optim.Adam(model.parameters(), lr=0.0001)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 
 def train(epoch):
