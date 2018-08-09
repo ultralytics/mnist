@@ -86,7 +86,7 @@ class ConvNetb(nn.Module):
         x = self.layer6(x)
         #print(x.shape)
         # x = self.fc(x.reshape(x.size(0), -1))
-        # x = self.fully_convolutional(x)
+        x = self.fully_convolutional(x)
         return x.squeeze()  # 500 x 60
 
 
