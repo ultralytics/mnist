@@ -41,7 +41,7 @@ class ConvNetb(nn.Module):
         super(ConvNetb, self).__init__()
         n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(1, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
             nn.LeakyReLU())
         self.layer2 = nn.Sequential(
@@ -64,11 +64,10 @@ class ConvNetb(nn.Module):
         # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
         self.fully_conv = nn.Conv2d(n * 16, num_classes, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
 
-
     def forward(self, x):  # 500 x 1 x 64 x 64
-        # print(x.shape)
+        #print(x.shape)
         x = self.layer1(x)
-        # print(x.shape)
+        #print(x.shape)
         x = self.layer2(x)
         # print(x.shape)
         x = self.layer3(x)
@@ -88,7 +87,7 @@ def main(model):
     epochs = 1000
     printerval = 1
     patience = 500
-    batch_size = 64
+    batch_size = 100
     cuda = torch.cuda.is_available()
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
@@ -253,6 +252,7 @@ def main(model):
 
             x -= rgb_mean
             x /= rgb_std
+            x = x[:, 0] / 3 + x[:, 1] / 3 + x[:, 2] / 3
 
             yhat = model(x)
             loss = criteria(yhat, y)
@@ -291,6 +291,7 @@ def main(model):
 
             x -= rgb_mean
             x /= rgb_std
+            x = x[:, 0] / 3 + x[:, 1] / 3 + x[:, 2] / 3
 
             with torch.no_grad():
                 yhat = model(x)
