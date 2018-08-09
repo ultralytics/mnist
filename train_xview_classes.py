@@ -43,23 +43,23 @@ class ConvNetb(nn.Module):
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
-            nn.LeakyReLU(0.3))
+            nn.LeakyReLU())
         self.layer2 = nn.Sequential(
             nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 2),
-            nn.LeakyReLU(0.3))
+            nn.LeakyReLU())
         self.layer3 = nn.Sequential(
             nn.Conv2d(n * 2, n * 4, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 4),
-            nn.LeakyReLU(0.3))
+            nn.LeakyReLU())
         self.layer4 = nn.Sequential(
             nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 8),
-            nn.LeakyReLU(0.3))
+            nn.LeakyReLU())
         self.layer5 = nn.Sequential(
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
-            nn.LeakyReLU(0.3))
+            nn.LeakyReLU())
         # self.layer6 = nn.Sequential(
         #     nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
         #     nn.BatchNorm2d(n * 32),
@@ -70,6 +70,12 @@ class ConvNetb(nn.Module):
         self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
         # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=8, stride=1, padding=0, bias=True)  # 5 layer s1s1
         # self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
+
+        self.fully_convolutional = nn.Sequential(
+            nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(60),
+            nn.LeakyReLU())
+
 
     def forward(self, x):  # 500 x 1 x 64 x 64
         # print(x.shape)
