@@ -94,7 +94,7 @@ def main(model):
     epochs = 1000
     printerval = 1
     patience = 500
-    batch_size = 500
+    batch_size = 64
     cuda = torch.cuda.is_available()
     device = torch.device('cuda:0' if cuda else 'cpu')
     print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
