@@ -45,7 +45,7 @@ class ConvNetb(nn.Module):
             nn.BatchNorm2d(n),
             nn.LeakyReLU())
         self.layer2 = nn.Sequential(
-            nn.Conv2d(n, n * 2, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 2),
             nn.LeakyReLU())
         self.layer3 = nn.Sequential(
@@ -67,22 +67,22 @@ class ConvNetb(nn.Module):
 
         # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
         # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s2
-        self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=8, stride=1, padding=0, bias=True)  # 5 layer s1
+        self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
         # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=8, stride=1, padding=0, bias=True)  # 5 layer s1s1
         # self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
 
     def forward(self, x):  # 500 x 1 x 64 x 64
-        print(x.shape)
+        # print(x.shape)
         x = self.layer1(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.layer2(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.layer3(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.layer4(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.layer5(x)
-        print(x.shape)
+        # print(x.shape)
         # x = self.fc(x.reshape(x.size(0), -1))
         x = self.fully_convolutional(x)
         return x.squeeze()  # 500 x 60
