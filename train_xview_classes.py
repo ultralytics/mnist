@@ -42,7 +42,7 @@ class ConvNetb(nn.Module):
         n = 32  # initial convolution size
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n*2, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(n),
+            nn.BatchNorm2d(n*2),
             nn.LeakyReLU())
         self.layer2 = nn.Sequential(
             nn.Conv2d(n*2, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
