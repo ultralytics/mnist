@@ -71,10 +71,6 @@ class ConvNetb(nn.Module):
         # self.fully_conv = nn.Conv2d(n * 16, 60, kernel_size=8, stride=1, padding=0, bias=True)  # 5 layer s1s1
         # self.fully_conv = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
 
-        self.fully_conv = nn.Sequential(
-            nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(60))
-
 
     def forward(self, x):  # 500 x 1 x 64 x 64
         # print(x.shape)
