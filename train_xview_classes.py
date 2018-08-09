@@ -39,13 +39,13 @@ def xview_class_weights(indices):  # weights of each class in the training set, 
 class ConvNetb(nn.Module):
     def __init__(self, num_classes=60):
         super(ConvNetb, self).__init__()
-        n = 32  # initial convolution size
+        n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, n*2, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(n*2),
+            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(n),
             nn.LeakyReLU())
         self.layer2 = nn.Sequential(
-            nn.Conv2d(n*2, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.Conv2d(n, n * 2, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n * 2),
             nn.LeakyReLU())
         self.layer3 = nn.Sequential(
@@ -60,14 +60,14 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
             nn.LeakyReLU())
-        self.layer6 = nn.Sequential(
-            nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(n * 32),
-            nn.LeakyReLU())
+        # self.layer6 = nn.Sequential(
+        #     nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
+        #     nn.BatchNorm2d(n * 32),
+        #     nn.LeakyReLU())
 
         # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
         # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s2
-        self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s1
+        self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
         # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=8, stride=1, padding=0, bias=True)  # 5 layer s1s1
         # self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
 
