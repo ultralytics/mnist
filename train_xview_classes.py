@@ -60,16 +60,9 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
             nn.LeakyReLU())
-        # self.layer6 = nn.Sequential(
-        #     nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
-        #     nn.BatchNorm2d(n * 32),
-        #     nn.LeakyReLU())
 
         # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
-        # self.fully_conv = nn.Conv2d(n * 16, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s2
-        self.fully_conv = nn.Conv2d(n * 16, 60, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
-        # self.fully_conv = nn.Conv2d(n * 16, 60, kernel_size=8, stride=1, padding=0, bias=True)  # 5 layer s1s1
-        # self.fully_conv = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
+        self.fully_conv = nn.Conv2d(n * 16, num_classes, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
 
 
     def forward(self, x):  # 500 x 1 x 64 x 64
