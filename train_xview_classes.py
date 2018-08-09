@@ -87,7 +87,6 @@ class ConvNetb(nn.Module):
         best_transform_index = torch.argmax(v, 1)
 
         for i, bt in enumerate(best_transform_index):
-            print(i, bt)
             b[0][i] = b[bt][i]
         x = b[0]
 
