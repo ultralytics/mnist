@@ -67,7 +67,7 @@ class ConvNetb(nn.Module):
 
         # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
         # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s2
-        self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=1, stride=1, padding=0, bias=True)  # 5 layer s1
+        self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=1, stride=1, padding=0, bias=True)  # 5 layer s1
         # self.fully_convolutional = nn.Conv2d(n * 16, 60, kernel_size=8, stride=1, padding=0, bias=True)  # 5 layer s1s1
         # self.fully_convolutional = nn.Conv2d(n * 32, 60, kernel_size=2, stride=1, padding=0, bias=True)  # 6 layer
 
