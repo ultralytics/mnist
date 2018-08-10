@@ -59,38 +59,39 @@ class ConvNetb(nn.Module):
         self.layer5 = nn.Sequential(
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
-            nn.LeakyReLU())
+            nn.LeakyReLU(),
+            nn.Dropout2d(0.5))
 
         # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
         self.fully_conv = nn.Conv2d(n * 16, num_classes, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
 
     def forward(self, x):  # 500 x 1 x 64 x 64
-        # transformations
-        xa = [x]  # 0 rot
-        xa.append(x.flip(2).flip(3))  # 180 rot
-        xa.append(x.transpose(2, 3).flip(2))  # -90 rot
-        xa.append(x.transpose(2, 3).flip(3))  # +90 rot
+        # # transformations
+        # xa = [x]  # 0 rot
+        # xa.append(x.flip(2).flip(3))  # 180 rot
+        # xa.append(x.transpose(2, 3).flip(2))  # -90 rot
+        # xa.append(x.transpose(2, 3).flip(3))  # +90 rot
+        #
+        # # import matplotlib.pyplot as plt
+        # # plt.subplot(2, 2, 1).imshow(b[0][1, 1].detach().numpy())
+        # # plt.subplot(2, 2, 2).imshow(b[1][1, 1].detach().numpy())
+        # # plt.subplot(2, 2, 3).imshow(b[2][1, 1].detach().numpy())
+        # # plt.subplot(2, 2, 4).imshow(b[3][1, 1].detach().numpy())
+        #
+        # v, b = [], []
+        # for i, a in enumerate(xa):
+        #     b.append(self.layer1(a))
+        #     v.append(b[i].sum(3).sum(2).sum(1).unsqueeze(1))
+        # v = torch.cat(v, 1)
+        #
+        # best_transform_index = torch.argmax(v, 1)
+        #
+        # x = b[0]
+        # for i, bt in enumerate(best_transform_index):
+        #     if bt>0:
+        #         x[i] = b[bt][i]
 
-        # import matplotlib.pyplot as plt
-        # plt.subplot(2, 2, 1).imshow(b[0][1, 1].detach().numpy())
-        # plt.subplot(2, 2, 2).imshow(b[1][1, 1].detach().numpy())
-        # plt.subplot(2, 2, 3).imshow(b[2][1, 1].detach().numpy())
-        # plt.subplot(2, 2, 4).imshow(b[3][1, 1].detach().numpy())
-
-        v, b = [], []
-        for i, a in enumerate(xa):
-            b.append(self.layer1(a))
-            v.append(b[i].sum(3).sum(2).sum(1).unsqueeze(1))
-        v = torch.cat(v, 1)
-
-        best_transform_index = torch.argmax(v, 1)
-
-        x = b[0]
-        for i, bt in enumerate(best_transform_index):
-            if bt>0:
-                x[i] = b[bt][i]
-
-        # x = self.layer1(x)
+        x = self.layer1(x)
         # print(x.shape)
         x = self.layer2(x)
         # print(x.shape)
