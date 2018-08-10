@@ -39,7 +39,7 @@ def xview_class_weights(indices):  # weights of each class in the training set, 
 class ConvNetb(nn.Module):
     def __init__(self, num_classes=60):
         super(ConvNetb, self).__init__()
-        n = 50  # initial convolution size
+        n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(n),
@@ -65,31 +65,31 @@ class ConvNetb(nn.Module):
         self.fully_conv = nn.Conv2d(n * 16, num_classes, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
 
     def forward(self, x):  # 500 x 1 x 64 x 64
-        # print(x.shape)
+        # # transformations
+        # xa = [x]  # 0 rot
+        # xa.append(x.flip(2).flip(3))  # 180 rot
+        # xa.append(x.transpose(2, 3).flip(2))  # -90 rot
+        # xa.append(x.transpose(2, 3).flip(3))  # +90 rot
+        #
+        # # import matplotlib.pyplot as plt
+        # # plt.subplot(2, 2, 1).imshow(b[0][1, 1].detach().numpy())
+        # # plt.subplot(2, 2, 2).imshow(b[1][1, 1].detach().numpy())
+        # # plt.subplot(2, 2, 3).imshow(b[2][1, 1].detach().numpy())
+        # # plt.subplot(2, 2, 4).imshow(b[3][1, 1].detach().numpy())
+        #
+        # v = []
+        # b = []
+        # for i, a in enumerate(xa):
+        #     b.append(self.layer1(a))
+        #     v.append(b[i].sum(3).sum(2).sum(1).unsqueeze(1))
+        # v = torch.cat(v, 1)
+        # best_transform_index = torch.argmax(v, 1)
+        #
+        # for i, bt in enumerate(best_transform_index):
+        #     b[0][i] = b[bt][i]
+        # x = b[0]
 
-        xa = [x.clone()]  # 0 rot
-        xa.append(x.clone().flip(2).flip(3))  # 180 rot
-        xa.append(x.clone().transpose(2, 3).flip(2))  # -90 rot
-        xa.append(x.clone().transpose(2, 3).flip(3))  # +90 rot
-
-        # import matplotlib.pyplot as plt
-        # plt.subplot(2, 2, 1).imshow(a0[1, 1].detach().numpy())
-        # plt.subplot(2, 2, 2).imshow(a1[1, 1].detach().numpy())
-        # plt.subplot(2, 2, 3).imshow(a2[1, 1].detach().numpy())
-        # plt.subplot(2, 2, 4).imshow(a3[1, 1].detach().numpy())
-
-        v = []
-        b = []
-        for i, a in enumerate(xa):
-            b.append(self.layer1(a))
-            v.append(b[i].sum(3).sum(2).sum(1).unsqueeze(1))
-        v = torch.cat(v, 1)
-        best_transform_index = torch.argmax(v, 1)
-
-        for i, bt in enumerate(best_transform_index):
-            b[0][i] = b[bt][i]
-        x = b[0]
-
+        x = self.layer1(x)
         # print(x.shape)
         x = self.layer2(x)
         # print(x.shape)
@@ -397,7 +397,7 @@ if __name__ == '__main__':
 # 18                  fc.weight      True       491520 [60, 8192]
 # 19                    fc.bias      True           60 [60]
 
-# 5 layer leaky SV+spatial augment, 64+64 pixels
+# 5 layer leaky SV+spatial augment, 64+64 pixels, 500 bs
 # 17 layers, 7.25568e+06 parameters, 7.25568e+06 gradients
 #        epoch        time        loss   metric(s)
 #            0      122.51      745.02     0.14759      80.922     0.26851
