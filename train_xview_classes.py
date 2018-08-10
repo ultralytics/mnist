@@ -83,16 +83,14 @@ class ConvNetb(nn.Module):
         b = torch.cat(b, 0)
         del xa
 
-        #value = b.sum(4).sum(3).sum(2)
-        #i = torch.argmax(value, 0)
-        #x = b[i].squeeze()
+        value = b.sum(4).sum(3).sum(2)
+        i = torch.argmax(value, 0)
+
+        x = b[i,:-1].squeeze()
         #print(x.shape)
 
-        x = b.max(0)[0]
 
-        # x=b[0]
-        # for i, bt in enumerate(best_transform_index):
-        #    x[i] = b[bt][i]
+
 
         # x = self.layer1(x)
         # print(x.shape)
@@ -428,7 +426,7 @@ if __name__ == '__main__':
 #            5      127.72      2206.6     0.44108      266.26     0.50366
 #            6      127.43      2111.6     0.46424      284.99     0.50487
 
-# 5 layer leaky SV+spatial augment, 64+64 pixels, 100 bs
+# 5 layer leaky SV+spatial augment, 64+64 pixels, 100 bs, select best of 4 rotations via highest layer 1 sum
 # 17 layers, 7.25568e+06 parameters, 7.25568e+06 gradients
 #        epoch        time        loss   metric(s)
 #            0      288.12      3428.7     0.20071      396.57     0.34167
