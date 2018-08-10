@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from utils import *
 
 # Start New Training
-# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '5leaky.pt'
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '6leaky64.pt'
 
 # Resume Training
 # cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt' -resume 1
@@ -59,11 +59,15 @@ class ConvNetb(nn.Module):
         self.layer5 = nn.Sequential(
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
+            nn.LeakyReLU())
+        self.layer6 = nn.Sequential(
+            nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(n * 32),
             nn.LeakyReLU(),
             nn.Dropout2d(0.5))
 
         # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
-        self.fully_conv = nn.Conv2d(n * 16, num_classes, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
+        self.fully_conv = nn.Conv2d(n * 32, num_classes, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s1
 
     def forward(self, x):  # 500 x 1 x 64 x 64
         # # transformations
@@ -101,6 +105,7 @@ class ConvNetb(nn.Module):
         # print(x.shape)
         x = self.layer5(x)
         # print(x.shape)
+        x = self.layer6(x)
         # x = self.fc(x.reshape(x.size(0), -1))
         x = self.fully_conv(x)
         return x.squeeze()  # 500 x 60
@@ -425,7 +430,7 @@ if __name__ == '__main__':
 #            5      127.72      2206.6     0.44108      266.26     0.50366
 #            6      127.43      2111.6     0.46424      284.99     0.50487
 
-# 5 layer leaky SV+spatial augment, 64+64 pixels, 100 bs
+# 5 layer leaky SV+spatial augment, 64+64 pixels, 100 bs + best 90deg rot
 # 17 layers, 7.25568e+06 parameters, 7.25568e+06 gradients
 #        epoch        time        loss   metric(s)
 #            0      288.12      3428.7     0.20071      396.57     0.34167
