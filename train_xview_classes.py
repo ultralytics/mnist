@@ -83,7 +83,7 @@ class ConvNetb(nn.Module):
         b = torch.cat(b, 0)
         del xa
 
-        value = b.sum(4).sum(3).sum(2)
+        value = b.view(*b.shape[:2], -1).std(2)
         best_ind = torch.argmax(value, 0)
 
         x = b[0]
