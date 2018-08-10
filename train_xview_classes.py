@@ -84,13 +84,14 @@ class ConvNetb(nn.Module):
         del xa
 
         value = b.sum(4).sum(3).sum(2)
-        i = torch.argmax(value, 0)
+        best_ind = torch.argmax(value, 0)
 
-        x = b[i,:-1].squeeze()
-        #print(x.shape)
+        x = b[0]
+        for count, i in enumerate(best_ind):
+            if i > 0:
+                x[count] = b[i, count]
 
-
-
+        # print(x.shape)
 
         # x = self.layer1(x)
         # print(x.shape)
