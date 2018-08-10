@@ -83,13 +83,12 @@ class ConvNetb(nn.Module):
         b = torch.cat(b, 0)
         del xa
 
-        value = b.sum(4).sum(3).sum(2)
-        i = torch.argmax(value, 0)
-        x = b[i].squeeze()
-        print(x.shape)
+        #value = b.sum(4).sum(3).sum(2)
+        #i = torch.argmax(value, 0)
+        #x = b[i].squeeze()
+        #print(x.shape)
 
-
-        # x = b.max(0)[0]
+        x = b.max(0)[0]
 
         # x=b[0]
         # for i, bt in enumerate(best_transform_index):
