@@ -77,21 +77,18 @@ class ConvNetb(nn.Module):
         # plt.subplot(2, 2, 3).imshow(b[2][1, 1].detach().numpy())
         # plt.subplot(2, 2, 4).imshow(b[3][1, 1].detach().numpy())
 
-        b = []
+        v, b = [], []
         for i, a in enumerate(xa):
             b.append(self.layer1(a).unsqueeze(0))
+            v.append(b[i].sum(3).sum(2).sum(1).unsqueeze(0))
         b = torch.cat(b, 0)
-        del xa
+        v = torch.cat(v, 0)
 
-        value = b.view(*b.shape[:2], -1).std(2)
-        best_ind = torch.argmax(value, 0)
+        best_transform_index = torch.argmax(v, 0)
 
         x = b[0]
-        for count, i in enumerate(best_ind):
-            if i > 0:
-                x[count] = b[i, count]
-
-        # print(x.shape)
+        for i, bt in enumerate(best_transform_index):
+            x[i] = b[bt][i]
 
         # x = self.layer1(x)
         # print(x.shape)
@@ -427,7 +424,7 @@ if __name__ == '__main__':
 #            5      127.72      2206.6     0.44108      266.26     0.50366
 #            6      127.43      2111.6     0.46424      284.99     0.50487
 
-# 5 layer leaky SV+spatial augment, 64+64 pixels, 100 bs, select best of 4 rotations via highest layer 1 sum
+# 5 layer leaky SV+spatial augment, 64+64 pixels, 100 bs
 # 17 layers, 7.25568e+06 parameters, 7.25568e+06 gradients
 #        epoch        time        loss   metric(s)
 #            0      288.12      3428.7     0.20071      396.57     0.34167
@@ -437,5 +434,3 @@ if __name__ == '__main__':
 #            4      287.94      2225.1     0.43963      308.38     0.50274
 #            5      287.99        2108     0.46444      275.92       0.504
 #            6      288.14      2024.6     0.48631      296.98     0.49741
-#            7      288.51      1951.5     0.50013      285.38     0.52248
-#            8      288.89      1881.6     0.51568      285.67     0.53598
