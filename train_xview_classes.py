@@ -79,16 +79,16 @@ class ConvNetb(nn.Module):
 
         v, b = [], []
         for i, a in enumerate(xa):
-            b.append(self.layer1(a).unsqueeze(0))
-            v.append(b[i].sum(3).sum(2).sum(1).unsqueeze(0))
-        b = torch.cat(b, 0)
-        v = torch.cat(v, 0)
+            b.append(self.layer1(a))
+            v.append(b[i].sum(3).sum(2).sum(1).unsqueeze(1))
+        v = torch.cat(v, 1)
 
-        best_transform_index = torch.argmax(v, 0)
+        best_transform_index = torch.argmax(v, 1)
 
         x = b[0]
         for i, bt in enumerate(best_transform_index):
-            x[i] = b[bt][i]
+            if bt>0:
+                x[i] = b[bt][i]
 
         # x = self.layer1(x)
         # print(x.shape)
