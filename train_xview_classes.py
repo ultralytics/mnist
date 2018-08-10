@@ -65,29 +65,29 @@ class ConvNetb(nn.Module):
         self.fully_conv = nn.Conv2d(n * 16, num_classes, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
 
     def forward(self, x):  # 500 x 1 x 64 x 64
-        # # transformations
-        # xa = [x]  # 0 rot
-        # xa.append(x.flip(2).flip(3))  # 180 rot
-        # xa.append(x.transpose(2, 3).flip(2))  # -90 rot
-        # xa.append(x.transpose(2, 3).flip(3))  # +90 rot
-        #
-        # # import matplotlib.pyplot as plt
-        # # plt.subplot(2, 2, 1).imshow(b[0][1, 1].detach().numpy())
-        # # plt.subplot(2, 2, 2).imshow(b[1][1, 1].detach().numpy())
-        # # plt.subplot(2, 2, 3).imshow(b[2][1, 1].detach().numpy())
-        # # plt.subplot(2, 2, 4).imshow(b[3][1, 1].detach().numpy())
-        #
-        # v = []
-        # b = []
-        # for i, a in enumerate(xa):
-        #     b.append(self.layer1(a))
-        #     v.append(b[i].sum(3).sum(2).sum(1).unsqueeze(1))
-        # v = torch.cat(v, 1)
-        # best_transform_index = torch.argmax(v, 1)
-        #
-        # for i, bt in enumerate(best_transform_index):
-        #     b[0][i] = b[bt][i]
-        # x = b[0]
+        # transformations
+        xa = [x]  # 0 rot
+        xa.append(x.flip(2).flip(3))  # 180 rot
+        xa.append(x.transpose(2, 3).flip(2))  # -90 rot
+        xa.append(x.transpose(2, 3).flip(3))  # +90 rot
+
+        # import matplotlib.pyplot as plt
+        # plt.subplot(2, 2, 1).imshow(b[0][1, 1].detach().numpy())
+        # plt.subplot(2, 2, 2).imshow(b[1][1, 1].detach().numpy())
+        # plt.subplot(2, 2, 3).imshow(b[2][1, 1].detach().numpy())
+        # plt.subplot(2, 2, 4).imshow(b[3][1, 1].detach().numpy())
+
+        v = []
+        b = []
+        for i, a in enumerate(xa):
+            b.append(self.layer1(a))
+            v.append(b[i].sum(3).sum(2).sum(1).unsqueeze(1))
+        v = torch.cat(v, 1)
+        best_transform_index = torch.argmax(v, 1)
+
+        for i, bt in enumerate(best_transform_index):
+            b[0][i] = b[bt][i]
+        x = b[0]
 
         x = self.layer1(x)
         # print(x.shape)
@@ -411,3 +411,14 @@ if __name__ == '__main__':
 #            8      121.24      448.43     0.43534      59.518      0.4814
 #            9       121.3      436.32     0.45119      59.821     0.49955
 #           10      121.78      424.26     0.46264       57.99     0.50135
+
+# 5 layer leaky SV+spatial augment, 64+64 pixels, 100 bs
+# 17 layers, 7.25568e+06 parameters, 7.25568e+06 gradients
+#        epoch        time        loss   metric(s)
+#            0      128.67      3509.1      0.1836      384.25     0.30715
+#            1      128.56      2937.2     0.28962      337.31     0.40175
+#            2      127.99      2637.8     0.34943      326.57     0.42516
+#            3      127.98      2459.5     0.38902      306.14     0.44886
+#            4      128.08      2318.4     0.41683      333.77     0.46359
+#            5      127.72      2206.6     0.44108      266.26     0.50366
+#            6      127.43      2111.6     0.46424      284.99     0.50487
