@@ -89,7 +89,7 @@ class ConvNetb(nn.Module):
             b[0][i] = b[bt][i]
         x = b[0]
 
-        x = self.layer1(x)
+        # x = self.layer1(x)
         # print(x.shape)
         x = self.layer2(x)
         # print(x.shape)
