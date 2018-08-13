@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from utils import *
 
 # Start New Training
-# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '6leaky64.pt'
+# sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '5leaky64.pt'
 
 # Resume Training
 # cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt' -resume 1
@@ -60,14 +60,14 @@ class ConvNetb(nn.Module):
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
             nn.LeakyReLU())
-        self.layer6 = nn.Sequential(
-            nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(n * 32),
-            nn.LeakyReLU(),
-            nn.Dropout2d(0.5))
+        # self.layer6 = nn.Sequential(
+        #     nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
+        #     nn.BatchNorm2d(n * 32),
+        #     nn.LeakyReLU(),
+        #     nn.Dropout2d(0.5))
 
         # self.fc = nn.Linear(int(8192/2), num_classes)  # 64 pixels, 4 layer, 64 filters
-        self.fully_conv = nn.Conv2d(n * 32, num_classes, kernel_size=2, stride=1, padding=0, bias=True)  # 5 layer s1
+        self.fully_conv = nn.Conv2d(n * 16, num_classes, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
 
     def forward(self, x):  # 500 x 1 x 64 x 64
         # # transformations
@@ -379,11 +379,11 @@ def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=
     return M
 
 
-def stripOptimizer():
+def strip_optimizer_from_checkpoint(filename = 'checkpoints/best.pt'):
     import torch
-    a = torch.load('6leaky681.pt', map_location='cpu')
+    a = torch.load(filename, map_location='cpu')
     a['optimizer'] = []
-    torch.save(a, '6leaky681_stripped.pt')
+    torch.save(a, filename.replace('.pt','_lite.pt'))
 
 
 if __name__ == '__main__':
