@@ -9,7 +9,8 @@
 *.HEIC
 *.weights
 *.pt
-data/*
+data/processed
+data/raw
 !data/*.mat
 
 output
