@@ -11,12 +11,13 @@
 *.pt
 data/processed
 data/raw
+
 !data/*.mat
 
 output
 __pycache__
 checkpoints
-*esults.txt
+*results.txt
 
 
 # GitHub Python GitIgnore ----------------------------------------------------------------------------------------------
