@@ -136,6 +136,7 @@ def main(model):
 
     def test(model):
         x, y = test_data
+        x, y = x.to(device), y.to(device)
 
         yhat = model(x)
         loss = criteria1(yhat, y)
