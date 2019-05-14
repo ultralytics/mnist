@@ -8,6 +8,7 @@ from utils import *
 # import torchvision
 # from torchvision import datasets, transforms
 
+# Set printoptions
 torch.set_printoptions(linewidth=320, precision=8)
 np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
 
@@ -154,7 +155,6 @@ def main(model):
         loss, accuracy = test(model.eval())
         if stopper.step(loss, metrics=(*accuracy,), model=model):
             break
-
 
 
 if __name__ == '__main__':
