@@ -1,13 +1,22 @@
 import copy
+import random
 import time
-import torch
 
 import numpy as np
-import pickle
+import torch
+
+from . import torch_utils
 
 # Set printoptions
 torch.set_printoptions(linewidth=320, precision=8)
 np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
+
+
+def init_seeds(seed=0):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch_utils.init_seeds(seed=seed)
+
 
 def create_batches(x, y, batch_size=1000, shuffle=False):
     if shuffle:
