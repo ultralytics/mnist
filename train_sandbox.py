@@ -1,15 +1,12 @@
 import scipy.io
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from utils import *
+from utils.utils import *
+
 
 # import torchvision
 # from torchvision import datasets, transforms
-
-torch.set_printoptions(linewidth=320, precision=8)
-np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
 
 
 # Epoch 25: 98.60% test accuracy, 0.0555 test loss (normalize after relu)
@@ -115,12 +112,11 @@ def main(model):
     i = torch.nonzero((mat['y'] == 0).squeeze() | (torch.rand(mat['y'].shape[1]) > 0.9).squeeze()).long().squeeze()
     i = i[0:11000]  # round to batch size
     mat['x'] = mat['x'][i]
-    mat['y'] = mat['y'][0, i].reshape(1,-1)
+    mat['y'] = mat['y'][0, i].reshape(1, -1)
 
     train_loader2 = create_batches(x=torch.Tensor(mat['x']),
                                    y=torch.Tensor(mat['y']).squeeze().long(),
                                    batch_size=batch_size, shuffle=True)
-
 
     mat = scipy.io.loadmat('data/MNISTtest.mat')
     test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long()
@@ -128,7 +124,7 @@ def main(model):
     # ntest = len(test_data[1])
 
     model = model.to(device)
-    weight = 1/torch.cuda.FloatTensor([10,1,1,1,1,1,1,1,1,1])
+    weight = 1 / torch.cuda.FloatTensor([10, 1, 1, 1, 1, 1, 1, 1, 1, 1])
     weight = weight / weight.sum()
     criteria0 = nn.BCELoss()  # nn.NLLLoss(), nn.CrossEntropyLoss()  # nn.MSELoss()
     criteria1 = nn.CrossEntropyLoss(weight=weight)  # nn.NLLLoss(), nn.CrossEntropyLoss()  # nn.MSELoss()

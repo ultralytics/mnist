@@ -1,9 +1,13 @@
 import copy
 import time
+import torch
 
 import numpy as np
 import pickle
 
+# Set printoptions
+torch.set_printoptions(linewidth=320, precision=8)
+np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
 
 def create_batches(x, y, batch_size=1000, shuffle=False):
     if shuffle:

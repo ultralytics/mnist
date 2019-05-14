@@ -1,13 +1,11 @@
+import argparse
 import math
 import random
-import argparse
 
 import cv2
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
-from utils import *
+from utils.utils import *
 
 # Start New Training
 # sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '5leaky64.pt'
@@ -21,9 +19,6 @@ parser.add_argument('-run_name', default='10pad_64f_5leaky.pt', help='run name')
 parser.add_argument('-resume', default=False, help='resume training flag')
 opt = parser.parse_args()
 print(opt)
-
-torch.set_printoptions(linewidth=320, precision=8)
-np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
 
 
 def xview_class_weights(indices):  # weights of each class in the training set, normalized to mu = 1
@@ -379,11 +374,11 @@ def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=
     return M
 
 
-def strip_optimizer_from_checkpoint(filename = 'checkpoints/best.pt'):
+def strip_optimizer_from_checkpoint(filename='checkpoints/best.pt'):
     import torch
     a = torch.load(filename, map_location='cpu')
     a['optimizer'] = []
-    torch.save(a, filename.replace('.pt','_lite.pt'))
+    torch.save(a, filename.replace('.pt', '_lite.pt'))
 
 
 if __name__ == '__main__':
