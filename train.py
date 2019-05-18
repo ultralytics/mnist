@@ -10,7 +10,7 @@ from utils.utils import *
 
 def main(model):
     lr = .001
-    epochs = 10
+    epochs = 20
     printerval = 1
     patience = 200
     batch_size = 1000
@@ -44,13 +44,20 @@ def main(model):
 
     model = model.to(device)
     criteria1 = nn.CrossEntropyLoss()
+    criteria2 = nn.BCEWithLogitsLoss()
+
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
     def train(model):
         for i, (x, y) in enumerate(train_loader2):
             x, y = x.to(device), y.to(device)
-            loss = criteria1(model(x), y)
+            pred = model(x)
+            y2 = torch.zeros_like(pred)
+            for j in range(len(pred)):
+                y2[j, y[j]] = 1
+
+            loss = criteria2(pred, y2)
 
             optimizer.zero_grad()
 
