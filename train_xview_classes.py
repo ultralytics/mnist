@@ -1,6 +1,5 @@
 import argparse
 import math
-import random
 
 import cv2
 import torch.nn as nn
@@ -113,20 +112,11 @@ def main(model):
     printerval = 1
     patience = 500
     batch_size = 100
-    cuda = torch.cuda.is_available()
-    device = torch.device('cuda:0' if cuda else 'cpu')
-    print('Running on %s\n%s' % (device.type, torch.cuda.get_device_properties(0) if cuda else ''))
+    device = torch_utils.select_device()
+    torch_utils.init_seeds()
 
     rgb_mean = torch.FloatTensor([60.134, 49.697, 40.746]).view((1, 3, 1, 1)).to(device)
     rgb_std = torch.FloatTensor([29.99, 24.498, 22.046]).view((1, 3, 1, 1)).to(device)
-
-    np.random.seed(0)
-    torch.manual_seed(0)
-    if cuda:
-        torch.cuda.empty_cache()
-        torch.cuda.manual_seed(0)
-        torch.cuda.manual_seed_all(0)
-        torch.backends.cudnn.benchmark = True
 
     # load < 2GB .mat files with scipy.io
     print('loading data...')
@@ -157,7 +147,7 @@ def main(model):
     best_loss = float('inf')
     nGPU = torch.cuda.device_count()
     if opt.resume:
-        checkpoint = torch.load(opt.run_name, map_location='cuda:0' if cuda else 'cpu')
+        checkpoint = torch.load(opt.run_name, map_location=device)
 
         model.load_state_dict(checkpoint['model'])
         if nGPU > 1:
@@ -203,7 +193,7 @@ def main(model):
 
     criteria = nn.CrossEntropyLoss()  # weight=xview_class_weights(range(60)).to(device))
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
-    modelinfo(model)
+    model_info(model)
 
     border = 32
     shape = X.shape[1:3]

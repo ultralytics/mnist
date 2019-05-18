@@ -14,6 +14,7 @@ def select_device(force_cpu=False):
     if not cuda:
         print('Using CPU')
     if cuda:
+        torch.backends.cudnn.benchmark = True
         c = 1024 ** 2  # bytes to MB
         ng = torch.cuda.device_count()
         x = [torch.cuda.get_device_properties(i) for i in range(ng)]
