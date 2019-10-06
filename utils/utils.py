@@ -69,19 +69,6 @@ def split_data(x, y, train=0.7, validate=0.15, test=0.15, shuffle=False):  # spl
     return x[:i], y[:i], x[i:j], y[i:j], x[j:k], y[j:k]  # xy train, xy validate, xy test
 
 
-def model_info(model, report='full'):
-    # Plots a line-by-line description of a PyTorch model
-    n_p = sum(x.numel() for x in model.parameters())  # number parameters
-    n_g = sum(x.numel() for x in model.parameters() if x.requires_grad)  # number gradients
-    if report is 'full':
-        print('%5s %40s %9s %12s %20s %10s %10s' % ('layer', 'name', 'gradient', 'parameters', 'shape', 'mu', 'sigma'))
-        for i, (name, p) in enumerate(model.named_parameters()):
-            name = name.replace('module_list.', '')
-            print('%5g %40s %9s %12g %20s %10.3g %10.3g' %
-                  (i, name, p.requires_grad, p.numel(), list(p.shape), p.mean(), p.std()))
-    print('Model Summary: %g layers, %g parameters, %g gradients' % (len(list(model.parameters())), n_p, n_g))
-
-
 class patienceStopper(object):
     def __init__(self, patience=10, verbose=True, epochs=1000, printerval=10, spa_start=float('inf')):
         self.patience = patience

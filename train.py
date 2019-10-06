@@ -52,7 +52,9 @@ def main(model):
     def train(model):
         for i, (x, y) in enumerate(train_loader2):
             x, y = x.to(device), y.to(device)
+            # x = x.repeat([1, 3, 1, 1])  # grey to rgb
             pred = model(x)
+
             y2 = torch.zeros_like(pred)
             for j in range(len(pred)):
                 y2[j, y[j]] = 1
@@ -87,6 +89,22 @@ def main(model):
 
 
 if __name__ == '__main__':
-    # main(MLP())
-    # main(ConvNeta())
-    main(ConvNetb())
+    # model=MLP()
+    # model = ConvNeta()
+    model = ConvNetb()
+
+    # # load pretrained model: https://github.com/Cadene/pretrained-models.pytorch#torchvision
+    # import pretrainedmodels
+    # model_name = 'resnet101'
+    # model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
+    #
+    # # adjust last layer
+    # n = 10  # desired classes
+    # filters = model.last_linear.weight.shape[1]
+    # model.last_linear.bias = torch.nn.Parameter(torch.zeros(n))
+    # model.last_linear.weight = torch.nn.Parameter(torch.zeros(n, filters))
+    # model.last_linear.out_features = n
+
+    # Train
+    torch_utils.model_info(model, report='full')
+    main(model)
