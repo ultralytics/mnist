@@ -9,7 +9,7 @@ def main(model):
     epochs = 20
     printerval = 1
     patience = 200
-    batch_size = 250
+    batch_size = 1000
     device = torch_utils.select_device()
     torch_utils.init_seeds()
 
@@ -36,7 +36,7 @@ def main(model):
 
     mat = scipy.io.loadmat('data/MNISTtest.mat')
     test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long().to(device)
-    # test_loader2 = create_batches(dataset=test_data, batch_size=10000)
+    test_loader2 = create_batches(dataset=test_data, batch_size=1000)
 
     model = model.to(device)
     criteria1 = nn.CrossEntropyLoss()
@@ -65,21 +65,22 @@ def main(model):
             optimizer.step()
 
     def test(model):
-        x, y = test_data
-        x, y = x.to(device), y.to(device)
-        x = x.repeat([1, 3, 1, 1])  # grey to rgb
-        x /= 255.  # rescale to 0-1
+        # x, y = test_data
+        for i, (x, y) in enumerate(train_loader2):
+            x, y = x.to(device), y.to(device)
+            x = x.repeat([1, 3, 1, 1])  # grey to rgb
+            x /= 255.  # rescale to 0-1
 
-        yhat = model(x)
-        loss = criteria1(yhat, y)
-        yhat_number = torch.argmax(yhat.data, 1)
+            yhat = model(x)
+            loss = criteria1(yhat, y)
+            yhat_number = torch.argmax(yhat.data, 1)
 
-        accuracy = []
-        for i in range(10):
-            j = y == i
-            accuracy.append((yhat_number[j] == y[j]).float().mean() * 100.0)
+            accuracy = []
+            for j in range(10):
+                j = y == j
+                accuracy.append((yhat_number[j] == y[j]).float().mean() * 100.0)
 
-        return loss, accuracy
+            return loss, accuracy
 
     for epoch in range(epochs):
         train(model.train())
