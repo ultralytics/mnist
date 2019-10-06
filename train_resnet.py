@@ -5,7 +5,7 @@ from utils.utils import *
 
 
 def main(model):
-    lr = 0.0001
+    lr = 0.00005
     epochs = 20
     printerval = 1
     patience = 200
