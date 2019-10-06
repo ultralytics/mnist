@@ -35,8 +35,10 @@ def main(model):
                                    batch_size=batch_size, shuffle=True)
 
     mat = scipy.io.loadmat('data/MNISTtest.mat')
-    test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long().to(device)
-    test_loader2 = create_batches(dataset=test_data, batch_size=1000)
+    # test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long().to(device)
+    test_loader2 = create_batches(x=torch.Tensor(mat['x']),
+                                  y=torch.Tensor(mat['y']).squeeze().long(),
+                                  batch_size=batch_size)
 
     model = model.to(device)
     criteria1 = nn.CrossEntropyLoss()
