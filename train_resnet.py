@@ -9,7 +9,7 @@ def main(model):
     epochs = 20
     printerval = 1
     patience = 200
-    batch_size = 1000
+    batch_size = 250
     device = torch_utils.select_device()
     torch_utils.init_seeds()
 
