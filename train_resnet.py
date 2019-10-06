@@ -48,7 +48,6 @@ def main(model):
     def train(model):
         for i, (x, y) in enumerate(train_loader2):
             x, y = x.to(device), y.to(device)
-
             x = x.repeat([1, 3, 1, 1])  # grey to rgb
             x /= 255.  # rescale to 0-1
 
@@ -68,6 +67,8 @@ def main(model):
     def test(model):
         x, y = test_data
         x, y = x.to(device), y.to(device)
+        x = x.repeat([1, 3, 1, 1])  # grey to rgb
+        x /= 255.  # rescale to 0-1
 
         yhat = model(x)
         loss = criteria1(yhat, y)
