@@ -5,11 +5,11 @@ from utils.utils import *
 
 
 def main(model):
-    lr = 0.00005
+    lr = 0.1
     epochs = 20
     printerval = 1
     patience = 200
-    batch_size = 1000
+    batch_size = 512
     device = torch_utils.select_device()
     torch_utils.init_seeds()
 
@@ -44,7 +44,8 @@ def main(model):
     criteria1 = nn.CrossEntropyLoss()
     criteria2 = nn.BCEWithLogitsLoss()
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.90, weight_decay=1E-5)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
     def train(model):
@@ -56,9 +57,7 @@ def main(model):
             pred = model(x)
 
             y2 = torch.zeros_like(pred)
-            for j in range(len(pred)):
-                y2[j, y[j]] = 1
-
+            y2[range(len(pred)), y] = 1.0
             loss = criteria2(pred, y2)
 
             optimizer.zero_grad()
