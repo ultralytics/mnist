@@ -48,8 +48,10 @@ def main(model):
     def train(model):
         for i, (x, y) in enumerate(train_loader2):
             x, y = x.to(device), y.to(device)
+
             x = x.repeat([1, 3, 1, 1])  # grey to rgb
             x /= 255.  # rescale to 0-1
+
             pred = model(x)
 
             y2 = torch.zeros_like(pred)
