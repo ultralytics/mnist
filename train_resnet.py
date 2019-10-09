@@ -9,10 +9,10 @@ from utils.utils import *
 
 
 def main(model):
-    lr = 0.01
-    epochs = 20
+    lr = 0.001
+    epochs = 10
     printerval = 1
-    patience = 10
+    patience = 5
     batch_size = 64
     device = torch_utils.select_device(device='1')
     torch_utils.init_seeds()
@@ -33,7 +33,7 @@ def main(model):
 
     x, y = [], []
     for i, c in enumerate(d):
-        for file in tqdm(glob.glob('%s/*.*' % c)[:8000]):
+        for file in tqdm(glob.glob('%s/*.*' % c)[:2000]):
             img = cv2.resize(cv2.imread(file), (128, 128))  # BGR
             img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
             img = np.expand_dims(img, axis=0)  # add batch dim
@@ -116,14 +116,14 @@ def main(model):
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb
             # x /= 255.  # rescale to 0-1
 
-            yhat = model(x)
-            loss = criteria(yhat, y)
-            yhat_number = torch.argmax(yhat.data, 1)
+            pred = model(x)
+            loss = criteria(pred, y)
 
             accuracy = []
+            pred_class = torch.argmax(pred.data, 1)
             for c in range(nc):
                 j = y == c
-                accuracy.append((yhat_number[j] == y[j]).float().mean() * 100.0)
+                accuracy.append((pred_class[j] == y[j]).float().mean() * 100.0)
 
         return loss, accuracy
 
