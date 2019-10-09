@@ -10,9 +10,9 @@ from utils.utils import *
 
 def main(model):
     lr = 0.1
-    epochs = 20
+    epochs = 1000
     printerval = 1
-    patience = 200
+    patience = 100
     batch_size = 128
     device = torch_utils.select_device(device='1')
     torch_utils.init_seeds()
@@ -52,10 +52,12 @@ def main(model):
     train_loader2 = create_batches(x=torch.Tensor(x),  # [60000, 1, 28, 28]
                                    y=torch.Tensor(y).squeeze().long(),  # [60000]
                                    batch_size=batch_size, shuffle=True)
+    del x, y
 
     test_loader2 = create_batches(x=torch.Tensor(xtest),
                                   y=torch.Tensor(ytest).squeeze().long(),
                                   batch_size=batch_size)
+    del xtest, ytest
 
     # import scipy.io
     # if not os.path.exists('data/MNISTtrain.mat'):
