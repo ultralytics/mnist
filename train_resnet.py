@@ -9,11 +9,11 @@ from utils.utils import *
 
 
 def main(model):
-    lr = 0.001
+    lr = 0.0005
     epochs = 10
     printerval = 1
     patience = 5
-    batch_size = 128
+    batch_size = 64
     device = torch_utils.select_device(device='1')
     torch_utils.init_seeds()
 
@@ -102,6 +102,18 @@ def main(model):
             x, y = x.to(device), y.to(device)
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb
             # x /= 255.  # rescale to 0-1
+
+            augment = True
+            if augment:
+                # random left-right flip
+                lr_flip = True
+                if lr_flip and random.random() < 0.5:
+                    x = torch.flip(x, [3])
+
+                # random up-down flip
+                ud_flip = True
+                if ud_flip and random.random() < 0.5:
+                    x = torch.flip(x, [2])
 
             loss = criteria(model(x), y)
 
