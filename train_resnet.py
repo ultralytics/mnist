@@ -10,7 +10,7 @@ from utils.utils import *
 
 def main(model):
     lr = 0.01
-    epochs = 1000
+    epochs = 30
     printerval = 1
     patience = 100
     batch_size = 32
@@ -33,7 +33,7 @@ def main(model):
 
     x, y = [], []
     for i, c in enumerate(d):
-        for file in tqdm(glob.glob('%s/*.*' % c)[:1000]):
+        for file in tqdm(glob.glob('%s/*.*' % c)[:2000]):
             img = cv2.resize(cv2.imread(file), (64, 64))  # BGR
             img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
             img = np.expand_dims(img, axis=0)  # add batch dim
@@ -85,11 +85,11 @@ def main(model):
     #                               batch_size=batch_size)
 
     model = model.to(device)
-    #criteria1 = nn.CrossEntropyLoss()
+    # criteria1 = nn.CrossEntropyLoss()
     criteria2 = nn.BCEWithLogitsLoss()
 
     # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.90, weight_decay=1E-5)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.90, weight_decay=1E-5, nesterov=True)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
     print('Starting training...')
@@ -100,7 +100,8 @@ def main(model):
         return b
 
     def train(model):
-        for i, (x, y) in tqdm(enumerate(train_loader2), desc='Training', total=len(train_loader2)):
+        pbar = tqdm(enumerate(train_loader2), desc='training', total=len(train_loader2))  # progress bar
+        for i, (x, y) in pbar:
             x, y = x.to(device), y.to(device)
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb
             # x /= 255.  # rescale to 0-1
@@ -114,8 +115,8 @@ def main(model):
             optimizer.step()
 
     def test(model):
-        # x, y = test_data
-        for i, (x, y) in tqdm(enumerate(test_loader2), desc='Testing', total=len(test_loader2)):
+        pbar = tqdm(enumerate(train_loader2), desc='testing', total=len(test_loader2))  # progress bar
+        for i, (x, y) in pbar:
             x, y = x.to(device), y.to(device)
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb
             # x /= 255.  # rescale to 0-1
@@ -129,7 +130,7 @@ def main(model):
                 j = y == j
                 accuracy.append((yhat_number[j] == y[j]).float().mean() * 100.0)
 
-            return loss, accuracy
+        return loss, accuracy
 
     for epoch in range(epochs):
         train(model.train())
