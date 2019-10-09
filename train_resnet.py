@@ -33,7 +33,7 @@ def main(model):
 
     x, y = [], []
     for i, c in enumerate(d):
-        for file in tqdm(glob.glob('%s/*.*' % c)[:2000]):
+        for file in tqdm(glob.glob('%s/*.*' % c)[:9000]):
             img = cv2.resize(cv2.imread(file), (128, 128))  # BGR
             img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
             img = np.expand_dims(img, axis=0)  # add batch dim
@@ -132,6 +132,12 @@ def main(model):
         loss, accuracy = test(model.eval())
         if stopper.step(loss, metrics=(*accuracy,), model=model):
             break
+
+    # save model
+    f = 'resnet101.pt'
+    bucket = 'yolov4'
+    torch.save(model, f)
+    os.system('gsutil cp -r %s gs://%s' % (f, bucket))
 
 
 if __name__ == '__main__':
