@@ -1,7 +1,7 @@
-import scipy.io
-import cv2
-import os
 import glob
+import os
+
+import cv2
 from tqdm import tqdm
 
 from models import *
@@ -57,6 +57,7 @@ def main(model):
                                   y=torch.Tensor(ytest).squeeze().long(),
                                   batch_size=batch_size)
 
+    # import scipy.io
     # if not os.path.exists('data/MNISTtrain.mat'):
     #    scipy.io.savemat('data/MNISTtrain.mat',
     #                     {'x': train.train_data.unsqueeze(1).numpy(), 'y': train.train_labels.squeeze().numpy()})
@@ -83,11 +84,12 @@ def main(model):
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
     print('Starting training...')
+
     def train(model):
         for i, (x, y) in enumerate(train_loader2):
             x, y = x.to(device), y.to(device)
-            x = x.repeat([1, 3, 1, 1])  # grey to rgb
-            x /= 255.  # rescale to 0-1
+            # x = x.repeat([1, 3, 1, 1])  # grey to rgb
+            # x /= 255.  # rescale to 0-1
 
             pred = model(x)
 
@@ -104,8 +106,8 @@ def main(model):
         # x, y = test_data
         for i, (x, y) in enumerate(test_loader2):
             x, y = x.to(device), y.to(device)
-            x = x.repeat([1, 3, 1, 1])  # grey to rgb
-            x /= 255.  # rescale to 0-1
+            # x = x.repeat([1, 3, 1, 1])  # grey to rgb
+            # x /= 255.  # rescale to 0-1
 
             yhat = model(x)
             loss = criteria1(yhat, y)
