@@ -1,4 +1,8 @@
 import scipy.io
+import cv2
+import os
+import glob
+from tqdm import tqdm
 
 from models import *
 from utils.utils import *
@@ -9,7 +13,7 @@ def main(model):
     epochs = 20
     printerval = 1
     patience = 200
-    batch_size = 512
+    batch_size = 128
     device = torch_utils.select_device()
     torch_utils.init_seeds()
 
@@ -23,22 +27,52 @@ def main(model):
     # train_loader = torch.utils.data.DataLoader(dataset=train, batch_size=batch_size, shuffle=False)
     # test_loader = torch.utils.data.DataLoader(dataset=test, batch_size=10000, shuffle=False)
 
+    # binary classifier dataset
+    path = '../knife_classifier/'
+    d = [path + x for x in os.listdir(path) if os.path.isdir(path + x)]  # category directories
+
+    x, y = [], []
+    for i, c in enumerate(d):
+        for file in tqdm(glob.glob('%s/*.*' % c)):
+            img = cv2.resize(cv2.imread(file), (224, 224))  # BGR
+            img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+            img = np.expand_dims(img, axis=0)  # add batch dim
+            img = np.ascontiguousarray(img, dtype=np.float32)  # uint8 to float32
+            img /= 255.0  # 0 - 255 to 0.0 - 1.0
+
+            x.append(img)  # input
+            y.append(i)  # output
+
+    x = np.concatenate(x, 0)
+    y = np.array(y)
+
+    shuffle_data(x, y)
+    x, y, xtest, ytest, *_ = split_data(x, y, train=0.9, validate=0.10, test=0.0)
+
+    train_loader2 = create_batches(x=torch.Tensor(x),  # [60000, 1, 28, 28]
+                                   y=torch.Tensor(y).squeeze().long(),  # [60000]
+                                   batch_size=batch_size, shuffle=True)
+
+    test_loader2 = create_batches(x=torch.Tensor(xtest),
+                                  y=torch.Tensor(ytest).squeeze().long(),
+                                  batch_size=batch_size)
+
     # if not os.path.exists('data/MNISTtrain.mat'):
     #    scipy.io.savemat('data/MNISTtrain.mat',
     #                     {'x': train.train_data.unsqueeze(1).numpy(), 'y': train.train_labels.squeeze().numpy()})
     #    scipy.io.savemat('data/MNISTtest.mat',
     #                     {'x': test.test_data.unsqueeze(1).numpy(), 'y': test.test_labels.squeeze().numpy()})
 
-    mat = scipy.io.loadmat('data/MNISTtrain.mat')
-    train_loader2 = create_batches(x=torch.Tensor(mat['x']),
-                                   y=torch.Tensor(mat['y']).squeeze().long(),
-                                   batch_size=batch_size, shuffle=True)
-
-    mat = scipy.io.loadmat('data/MNISTtest.mat')
-    # test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long().to(device)
-    test_loader2 = create_batches(x=torch.Tensor(mat['x']),
-                                  y=torch.Tensor(mat['y']).squeeze().long(),
-                                  batch_size=batch_size)
+    # mat = scipy.io.loadmat('data/MNISTtrain.mat')
+    # train_loader2 = create_batches(x=torch.Tensor(mat['x']),  # [60000, 1, 28, 28]
+    #                                y=torch.Tensor(mat['y']).squeeze().long(),  # [60000]
+    #                                batch_size=batch_size, shuffle=True)
+    #
+    # mat = scipy.io.loadmat('data/MNISTtest.mat')
+    # # test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long().to(device)
+    # test_loader2 = create_batches(x=torch.Tensor(mat['x']),
+    #                               y=torch.Tensor(mat['y']).squeeze().long(),
+    #                               batch_size=batch_size)
 
     model = model.to(device)
     criteria1 = nn.CrossEntropyLoss()
@@ -48,6 +82,7 @@ def main(model):
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.90, weight_decay=1E-5)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
+    print('Starting training...')
     def train(model):
         for i, (x, y) in enumerate(train_loader2):
             x, y = x.to(device), y.to(device)
@@ -102,7 +137,7 @@ if __name__ == '__main__':
     model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
 
     # adjust last layer
-    n = 10  # desired classes
+    n = 2  # desired classes
     filters = model.last_linear.weight.shape[1]
     model.last_linear.bias = torch.nn.Parameter(torch.zeros(n))
     model.last_linear.weight = torch.nn.Parameter(torch.zeros(n, filters))
