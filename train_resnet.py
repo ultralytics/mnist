@@ -10,11 +10,11 @@ from utils.utils import *
 
 def main(model):
     lr = 0.01
-    epochs = 30
+    epochs = 20
     printerval = 1
-    patience = 100
-    batch_size = 32
-    device = torch_utils.select_device(device='1' if torch.cuda.is_available() else '')
+    patience = 10
+    batch_size = 64
+    device = torch_utils.select_device(device='1')
     torch_utils.init_seeds()
 
     # MNIST Dataset
@@ -33,8 +33,8 @@ def main(model):
 
     x, y = [], []
     for i, c in enumerate(d):
-        for file in tqdm(glob.glob('%s/*.*' % c)[:2000]):
-            img = cv2.resize(cv2.imread(file), (64, 64))  # BGR
+        for file in tqdm(glob.glob('%s/*.*' % c)[:8000]):
+            img = cv2.resize(cv2.imread(file), (128, 128))  # BGR
             img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
             img = np.expand_dims(img, axis=0)  # add batch dim
             img = np.ascontiguousarray(img, dtype=np.float32)  # uint8 to float32
@@ -48,22 +48,19 @@ def main(model):
     y = np.array(y)
     nc = len(np.unique(y))  # number of classes
 
-    print('Shuffling...')
-    shuffle_data(x, y)
-
     print('Splitting into train and validate sets...')
-    x, y, xtest, ytest, *_ = split_data(x, y, train=0.9, validate=0.10, test=0.0)
+    x, y, xtest, ytest, *_ = split_data(x, y, train=0.8, validate=0.20, test=0.0, shuffle=True)
 
     print('Creating Train Dataloader...')
-    train_loader2 = create_batches(x=torch.Tensor(x),  # [60000, 1, 28, 28]
-                                   y=torch.Tensor(y).squeeze().long(),  # [60000]
-                                   batch_size=batch_size, shuffle=True)
+    train_loader = create_batches(x=torch.Tensor(x),  # [60000, 1, 28, 28]
+                                  y=torch.Tensor(y).squeeze().long(),  # [60000]
+                                  batch_size=batch_size, shuffle=True)
     del x, y
 
     print('Creating Test Dataloader...')
-    test_loader2 = create_batches(x=torch.Tensor(xtest),
-                                  y=torch.Tensor(ytest).squeeze().long(),
-                                  batch_size=batch_size)
+    test_loader = create_batches(x=torch.Tensor(xtest),
+                                 y=torch.Tensor(ytest).squeeze().long(),
+                                 batch_size=batch_size)
     del xtest, ytest
 
     # import scipy.io
@@ -74,19 +71,19 @@ def main(model):
     #                     {'x': test.test_data.unsqueeze(1).numpy(), 'y': test.test_labels.squeeze().numpy()})
 
     # mat = scipy.io.loadmat('data/MNISTtrain.mat')
-    # train_loader2 = create_batches(x=torch.Tensor(mat['x']),  # [60000, 1, 28, 28]
+    # train_loader = create_batches(x=torch.Tensor(mat['x']),  # [60000, 1, 28, 28]
     #                                y=torch.Tensor(mat['y']).squeeze().long(),  # [60000]
     #                                batch_size=batch_size, shuffle=True)
     #
     # mat = scipy.io.loadmat('data/MNISTtest.mat')
     # # test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long().to(device)
-    # test_loader2 = create_batches(x=torch.Tensor(mat['x']),
+    # test_loader = create_batches(x=torch.Tensor(mat['x']),
     #                               y=torch.Tensor(mat['y']).squeeze().long(),
     #                               batch_size=batch_size)
 
     model = model.to(device)
-    # criteria1 = nn.CrossEntropyLoss()
-    criteria2 = nn.BCEWithLogitsLoss()
+    criteria = nn.CrossEntropyLoss()
+    # criteria2 = nn.BCEWithLogitsLoss()
 
     # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.90, weight_decay=1E-5, nesterov=True)
@@ -100,34 +97,32 @@ def main(model):
         return b
 
     def train(model):
-        pbar = tqdm(enumerate(train_loader2), desc='training', total=len(train_loader2))  # progress bar
+        pbar = tqdm(enumerate(train_loader), desc='train', total=len(train_loader))  # progress bar
         for i, (x, y) in pbar:
             x, y = x.to(device), y.to(device)
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb
             # x /= 255.  # rescale to 0-1
 
-            pred = model(x)
-            loss = criteria2(pred, class2binary(pred, y))
+            loss = criteria(model(x), y)
 
             optimizer.zero_grad()
-
             loss.backward()
             optimizer.step()
 
     def test(model):
-        pbar = tqdm(enumerate(train_loader2), desc='testing', total=len(test_loader2))  # progress bar
+        pbar = tqdm(enumerate(test_loader), desc='test', total=len(test_loader))  # progress bar
         for i, (x, y) in pbar:
             x, y = x.to(device), y.to(device)
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb
             # x /= 255.  # rescale to 0-1
 
             yhat = model(x)
-            loss = criteria2(yhat, class2binary(yhat, y))
+            loss = criteria(yhat, y)
             yhat_number = torch.argmax(yhat.data, 1)
 
             accuracy = []
-            for j in range(nc):
-                j = y == j
+            for c in range(nc):
+                j = y == c
                 accuracy.append((yhat_number[j] == y[j]).float().mean() * 100.0)
 
         return loss, accuracy
