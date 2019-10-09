@@ -13,7 +13,7 @@ def main(model):
     epochs = 10
     printerval = 1
     patience = 5
-    batch_size = 64
+    batch_size = 128
     device = torch_utils.select_device(device='1')
     torch_utils.init_seeds()
 
@@ -136,7 +136,7 @@ def main(model):
     # save model
     f = 'resnet101.pt'
     bucket = 'yolov4'
-    torch.save(model, f)
+    torch.save(stopper.bestmodel, f)
     os.system('gsutil cp -r %s gs://%s' % (f, bucket))
 
 
@@ -159,7 +159,6 @@ if __name__ == '__main__':
     model.last_linear.out_features = n
 
     # Display
-    torch_utils.model_info(model, report='full')
     for x in ['model.input_size', 'model.input_space', 'model.input_range', 'model.mean', 'model.std']:
         print(x + ' =', eval(x))
 

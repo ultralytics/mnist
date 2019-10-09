@@ -130,7 +130,7 @@ class patienceStopper(object):
 
     def first(self, model):
         if model:
-            torch_utils.model_info(model)
+            torch_utils.model_info(model, 'summary')
         s = ('epoch', 'time', 'loss', 'metric(s)')
         print('%12s' * len(s) % s)
 
