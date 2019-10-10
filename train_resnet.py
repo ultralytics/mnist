@@ -148,7 +148,8 @@ def main(model):
     # save model
     f = 'resnet101.pt'
     bucket = 'yolov4'
-    torch.save(stopper.bestmodel, f)
+    chkpt = {'model': stopper.bestmodel.state_dict()}
+    torch.save(chkpt, f)
     os.system('gsutil cp -r %s gs://%s' % (f, bucket))
 
 
