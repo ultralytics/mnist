@@ -80,20 +80,17 @@ def model_info(model, report='summary'):
 
 
 def load_classifier(name='resnet101', n=2):
-    # loads a pretrained model with new output layers adjusted to n classes
+    # Loads a pretrained model reshaped to n-class output
     import pretrainedmodels  # https://github.com/Cadene/pretrained-models.pytorch#torchvision
-
-    # Load model
     model = pretrainedmodels.__dict__[name](num_classes=1000, pretrained='imagenet')
 
-    # Display properties
+    # Display model properties
     for x in ['model.input_size', 'model.input_space', 'model.input_range', 'model.mean', 'model.std']:
         print(x + ' =', eval(x))
 
-    # adjust last layer
+    # Reshape output to n classes
     filters = model.last_linear.weight.shape[1]
     model.last_linear.bias = torch.nn.Parameter(torch.zeros(n))
     model.last_linear.weight = torch.nn.Parameter(torch.zeros(n, filters))
     model.last_linear.out_features = n
-
     return model
