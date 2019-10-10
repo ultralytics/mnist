@@ -157,23 +157,7 @@ if __name__ == '__main__':
     # model=MLP()
     # model = ConvNeta()
     # model = ConvNetb()
-
-    # load pretrained model: https://github.com/Cadene/pretrained-models.pytorch#torchvision
-    import pretrainedmodels
-
-    model_name = 'resnet101'
-    model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
-
-    # adjust last layer
-    n = 2  # desired classes
-    filters = model.last_linear.weight.shape[1]
-    model.last_linear.bias = torch.nn.Parameter(torch.zeros(n))
-    model.last_linear.weight = torch.nn.Parameter(torch.zeros(n, filters))
-    model.last_linear.out_features = n
-
-    # Display
-    for x in ['model.input_size', 'model.input_space', 'model.input_range', 'model.mean', 'model.std']:
-        print(x + ' =', eval(x))
+    model = torch_utils.load_classifier(name='resnet101', n=2)
 
     # Train
     main(model)

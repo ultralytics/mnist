@@ -4,27 +4,19 @@ import numpy as np
 from tqdm import tqdm
 import glob
 from utils import torch_utils
-import pretrainedmodels
 
 device = torch_utils.select_device()
 
 # Load model
-model_name = 'resnet101'
-model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
+model = torch_utils.load_classifier(name='resnet101', n=2)
 
-# adjust last layer
-n = 2  # desired classes
-filters = model.last_linear.weight.shape[1]
-model.last_linear.bias = torch.nn.Parameter(torch.zeros(n))
-model.last_linear.weight = torch.nn.Parameter(torch.zeros(n, filters))
-model.last_linear.out_features = n
-
+# Load state_dict
 chkpt = torch.load('resnet101.pt', map_location=device)
 model.load_state_dict(chkpt['model'], strict=True)
+model.eval()
 
 dir = './samples'
 results = []
-model.eval()
 with torch.no_grad():
     for file in tqdm(glob.glob('%s/*.*' % dir)[:9000]):
         img = cv2.resize(cv2.imread(file), (128, 128))  # BGR
