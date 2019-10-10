@@ -14,7 +14,7 @@ def main(model):
     printerval = 1
     patience = 5
     batch_size = 64
-    device = torch_utils.select_device(device='1')
+    device = torch_utils.select_device(device='0')
     torch_utils.init_seeds()
 
     # MNIST Dataset
