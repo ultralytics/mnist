@@ -90,12 +90,6 @@ def main(model):
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
     print('Starting training...')
-
-    def class2binary(x, c):
-        b = torch.zeros_like(x)
-        b[range(len(x)), c] = 1.0
-        return b
-
     def train(model):
         pbar = tqdm(enumerate(train_loader), desc='train', total=len(train_loader))  # progress bar
         for i, (x, y) in pbar:
