@@ -9,7 +9,7 @@ from utils.utils import *
 
 
 def main(model):
-    lr = .001
+    lr = 0.001
     epochs = 20
     printerval = 1
     patience = 200
@@ -33,13 +33,13 @@ def main(model):
     #    scipy.io.savemat('data/MNISTtest.mat',
     #                     {'x': test.test_data.unsqueeze(1).numpy(), 'y': test.test_labels.squeeze().numpy()})
 
-    mat = scipy.io.loadmat('data/MNISTtrain.mat')
-    train_loader2 = create_batches(x=torch.Tensor(mat['x']),
-                                   y=torch.Tensor(mat['y']).squeeze().long(),
-                                   batch_size=batch_size, shuffle=True)
+    mat = scipy.io.loadmat("data/MNISTtrain.mat")
+    train_loader2 = create_batches(
+        x=torch.Tensor(mat["x"]), y=torch.Tensor(mat["y"]).squeeze().long(), batch_size=batch_size, shuffle=True
+    )
 
-    mat = scipy.io.loadmat('data/MNISTtest.mat')
-    test_data = torch.Tensor(mat['x']), torch.Tensor(mat['y']).squeeze().long().to(device)
+    mat = scipy.io.loadmat("data/MNISTtest.mat")
+    test_data = torch.Tensor(mat["x"]), torch.Tensor(mat["y"]).squeeze().long().to(device)
     # test_loader2 = create_batches(dataset=test_data, batch_size=10000)
 
     model = model.to(device)
@@ -88,7 +88,7 @@ def main(model):
             break
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # model=MLP()
     # model = ConvNeta()
     model = ConvNetb()
@@ -106,5 +106,5 @@ if __name__ == '__main__':
     # model.last_linear.out_features = n
 
     # Train
-    torch_utils.model_info(model, report='full')
+    torch_utils.model_info(model, report="full")
     main(model)

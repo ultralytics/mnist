@@ -9,14 +9,15 @@ class SANDD(nn.Module):
             nn.Conv2d(1, 32, kernel_size=(1, 30), stride=(1, 2), padding=(0, 15), bias=False),
             nn.BatchNorm2d(32),
             nn.LeakyReLU(0.1),
-            nn.MaxPool2d(kernel_size=(1, 2), stride=1))
+            nn.MaxPool2d(kernel_size=(1, 2), stride=1),
+        )
         self.layer2 = nn.Sequential(
             nn.Conv2d(32, 64, kernel_size=(1, 30), stride=(1, 2), padding=(0, 15), bias=False),
             nn.BatchNorm2d(64),
             nn.LeakyReLU(0.1),
-            nn.MaxPool2d(kernel_size=(1, 2), stride=1))
-        self.layer3 = nn.Sequential(
-            nn.Conv2d(64, n_out, kernel_size=(1, 100), stride=(1, 1), padding=(0, 0)))
+            nn.MaxPool2d(kernel_size=(1, 2), stride=1),
+        )
+        self.layer3 = nn.Sequential(nn.Conv2d(64, n_out, kernel_size=(1, 100), stride=(1, 1), padding=(0, 0)))
 
     def forward(self, x):  # x.shape = [bs, 400]
         x = x.view((-1, 1, 400))  # [bs, 1, 400]
@@ -35,14 +36,15 @@ class WAVE2(nn.Module):
             nn.Conv2d(1, 32, kernel_size=(2, 30), stride=(1, 2), padding=(1, 15), bias=False),
             nn.BatchNorm2d(32),
             nn.LeakyReLU(0.1),
-            nn.MaxPool2d(kernel_size=(1, 2), stride=1))
+            nn.MaxPool2d(kernel_size=(1, 2), stride=1),
+        )
         self.layer2 = nn.Sequential(
             nn.Conv2d(32, 64, kernel_size=(2, 30), stride=(1, 2), padding=(0, 15), bias=False),
             nn.BatchNorm2d(64),
             nn.LeakyReLU(0.1),
-            nn.MaxPool2d(kernel_size=(1, 2), stride=1))
-        self.layer3 = nn.Sequential(
-            nn.Conv2d(64, n_out, kernel_size=(2, 64), stride=(1, 1), padding=(0, 0)))
+            nn.MaxPool2d(kernel_size=(1, 2), stride=1),
+        )
+        self.layer3 = nn.Sequential(nn.Conv2d(64, n_out, kernel_size=(2, 64), stride=(1, 1), padding=(0, 0)))
 
     def forward(self, x):  # x.shape = [bs, 512]
         x = x.view((-1, 2, 256))  # [bs, 2, 256]
@@ -101,12 +103,14 @@ class ConvNetb(nn.Module):
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.layer2 = nn.Sequential(
             nn.Conv2d(16, 32, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.fc = nn.Linear(7 * 7 * 32, num_classes)
 
     def forward(self, x):  # x.size() = [512, 1, 28, 28]

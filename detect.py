@@ -8,17 +8,17 @@ from utils import torch_utils
 device = torch_utils.select_device()
 
 # Load model
-model = torch_utils.load_classifier(name='resnet101', n=2)
+model = torch_utils.load_classifier(name="resnet101", n=2)
 
 # Load state_dict
-chkpt = torch.load('resnet101.pt', map_location=device)
-model.load_state_dict(chkpt['model'], strict=True)
+chkpt = torch.load("resnet101.pt", map_location=device)
+model.load_state_dict(chkpt["model"], strict=True)
 model.eval()
 
-dir = './samples'
+dir = "./samples"
 results = []
 with torch.no_grad():
-    for file in tqdm(glob.glob('%s/*.*' % dir)[:9000]):
+    for file in tqdm(glob.glob("%s/*.*" % dir)[:9000]):
         img = cv2.resize(cv2.imread(file), (128, 128))  # BGR
         img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
         img = np.expand_dims(img, axis=0)  # add batch dim
