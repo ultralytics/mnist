@@ -9,7 +9,7 @@ from . import torch_utils
 
 # Set printoptions
 torch.set_printoptions(linewidth=320, precision=8)
-np.set_printoptions(linewidth=320, formatter={'float_kind': '{:11.5g}'.format})  # format short g, %precision=5
+np.set_printoptions(linewidth=320, formatter={"float_kind": "{:11.5g}".format})  # format short g, %precision=5
 
 
 def init_seeds(seed=0):
@@ -29,8 +29,8 @@ def create_batches(x, y, batch_size=1000, shuffle=False):
     nb = x.shape[0] // batch_size  # number of batches
     remainder = x.shape[0] % batch_size  # number of remainder samples
     if remainder != 0:
-        print('Warning: dataset size %g indivisible by batch size %g, %g extra.' % (x.shape[0], batch_size, remainder))
-        x, y = x[:nb * batch_size], y[:nb * batch_size]  # trim off extra data
+        print("Warning: dataset size %g indivisible by batch size %g, %g extra." % (x.shape[0], batch_size, remainder))
+        x, y = x[: nb * batch_size], y[: nb * batch_size]  # trim off extra data
 
     if type(x).__module__ == np.__name__:  # is numpy
         x = x.reshape(nb, batch_size, *x.shape[1:])
@@ -70,7 +70,7 @@ def split_data(x, y, train=0.7, validate=0.15, test=0.15, shuffle=False):  # spl
 
 
 class patienceStopper(object):
-    def __init__(self, patience=10, verbose=True, epochs=1000, printerval=10, spa_start=float('inf')):
+    def __init__(self, patience=10, verbose=True, epochs=1000, printerval=10, spa_start=float("inf")):
         self.patience = patience
         self.verbose = verbose
         self.bestepoch = 0
@@ -85,7 +85,7 @@ class patienceStopper(object):
         self.spamodel = None
 
     def reset(self):
-        self.bestloss = float('inf')
+        self.bestloss = float("inf")
         self.bestmetrics = None
         self.num_bad_epochs = 0
 
@@ -120,10 +120,10 @@ class patienceStopper(object):
                 self.spamodel = copy.deepcopy(model)
 
         if self.num_bad_epochs > self.patience:
-            self.final('%g Patience exceeded at epoch %g.' % (self.patience, self.epoch))
+            self.final("%g Patience exceeded at epoch %g." % (self.patience, self.epoch))
             return True
         elif self.epoch >= self.epochs:
-            self.final('WARNING: %g Patience not exceeded by epoch %g (train longer).' % (self.patience, self.epoch))
+            self.final("WARNING: %g Patience not exceeded by epoch %g (train longer)." % (self.patience, self.epoch))
             return True
         else:
             return False
@@ -131,22 +131,24 @@ class patienceStopper(object):
     def first(self, model):
         if model:
             torch_utils.model_info(model)
-        s = ('epoch', 'time', 'loss', 'metric(s)')
-        print('%12s' * len(s) % s)
+        s = ("epoch", "time", "loss", "metric(s)")
+        print("%12s" * len(s) % s)
 
     def printepoch(self, epoch, loss, metrics):
         s = (epoch, time.time() - self.t, loss)
         if metrics is not None:
             for i in range(len(metrics)):
                 s += (metrics[i],)
-        p = '%12.5g' * len(s) % s
+        p = "%12.5g" * len(s) % s
         print(p)
-        with open('results.txt', 'a') as file:
-            file.write(p + '\n')
+        with open("results.txt", "a") as file:
+            file.write(p + "\n")
         self.t = time.time()
 
     def final(self, msg):
         dt = time.time() - self.t0
-        print('%s\nFinished %g epochs in %.3fs (%.3f epochs/s). Best results:' % (
-            msg, self.epochs + 1, dt, (self.epochs + 1) / dt))
+        print(
+            "%s\nFinished %g epochs in %.3fs (%.3f epochs/s). Best results:"
+            % (msg, self.epochs + 1, dt, (self.epochs + 1) / dt)
+        )
         self.printepoch(self.bestepoch, self.bestloss, self.bestmetrics)

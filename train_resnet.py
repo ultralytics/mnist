@@ -14,7 +14,7 @@ def main(model):
     printerval = 1
     patience = 5
     batch_size = 64
-    device = torch_utils.select_device(device='0')
+    device = torch_utils.select_device(device="0")
     torch_utils.init_seeds()
 
     # MNIST Dataset
@@ -28,12 +28,12 @@ def main(model):
     # test_loader = torch.utils.data.DataLoader(dataset=test, batch_size=10000, shuffle=False)
 
     # binary classifier dataset
-    path = '../knife_classifier/'
+    path = "../knife_classifier/"
     d = [path + x for x in os.listdir(path) if os.path.isdir(path + x)]  # category directories
 
     x, y = [], []
     for i, c in enumerate(d):
-        for file in tqdm(glob.glob('%s/*.*' % c)[:9000]):
+        for file in tqdm(glob.glob("%s/*.*" % c)[:9000]):
             img = cv2.resize(cv2.imread(file), (128, 128))  # BGR
             img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
             img = np.expand_dims(img, axis=0)  # add batch dim
@@ -43,24 +43,25 @@ def main(model):
             x.append(img)  # input
             y.append(i)  # output
 
-    print('Concatenating...')
+    print("Concatenating...")
     x = np.concatenate(x, 0)
     y = np.array(y)
     nc = len(np.unique(y))  # number of classes
 
-    print('Splitting into train and validate sets...')
+    print("Splitting into train and validate sets...")
     x, y, xtest, ytest, *_ = split_data(x, y, train=0.8, validate=0.20, test=0.0, shuffle=True)
 
-    print('Creating Train Dataloader...')
-    train_loader = create_batches(x=torch.Tensor(x),  # [60000, 1, 28, 28]
-                                  y=torch.Tensor(y).squeeze().long(),  # [60000]
-                                  batch_size=batch_size, shuffle=True)
+    print("Creating Train Dataloader...")
+    train_loader = create_batches(
+        x=torch.Tensor(x),  # [60000, 1, 28, 28]
+        y=torch.Tensor(y).squeeze().long(),  # [60000]
+        batch_size=batch_size,
+        shuffle=True,
+    )
     del x, y
 
-    print('Creating Test Dataloader...')
-    test_loader = create_batches(x=torch.Tensor(xtest),
-                                 y=torch.Tensor(ytest).squeeze().long(),
-                                 batch_size=batch_size)
+    print("Creating Test Dataloader...")
+    test_loader = create_batches(x=torch.Tensor(xtest), y=torch.Tensor(ytest).squeeze().long(), batch_size=batch_size)
     del xtest, ytest
 
     # import scipy.io
@@ -86,12 +87,13 @@ def main(model):
     # criteria2 = nn.BCEWithLogitsLoss()
 
     # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.90, weight_decay=1E-5, nesterov=True)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.90, weight_decay=1e-5, nesterov=True)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
-    print('Starting training...')
+    print("Starting training...")
+
     def train(model):
-        pbar = tqdm(enumerate(train_loader), desc='train', total=len(train_loader))  # progress bar
+        pbar = tqdm(enumerate(train_loader), desc="train", total=len(train_loader))  # progress bar
         for i, (x, y) in pbar:
             x, y = x.to(device), y.to(device)
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb
@@ -116,7 +118,7 @@ def main(model):
             optimizer.step()
 
     def test(model):
-        pbar = tqdm(enumerate(test_loader), desc='test', total=len(test_loader))  # progress bar
+        pbar = tqdm(enumerate(test_loader), desc="test", total=len(test_loader))  # progress bar
         for i, (x, y) in pbar:
             x, y = x.to(device), y.to(device)
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb
@@ -140,18 +142,18 @@ def main(model):
             break
 
     # save model
-    f = 'resnet101.pt'
-    bucket = 'yolov4'
-    chkpt = {'model': stopper.bestmodel.state_dict()}
+    f = "resnet101.pt"
+    bucket = "yolov4"
+    chkpt = {"model": stopper.bestmodel.state_dict()}
     torch.save(chkpt, f)
-    os.system('gsutil cp -r %s gs://%s' % (f, bucket))
+    os.system("gsutil cp -r %s gs://%s" % (f, bucket))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # model=MLP()
     # model = ConvNeta()
     # model = ConvNetb()
-    model = torch_utils.load_classifier(name='resnet101', n=2)
+    model = torch_utils.load_classifier(name="resnet101", n=2)
 
     # Train
     main(model)

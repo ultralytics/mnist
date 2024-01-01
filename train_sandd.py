@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    lr = .001
+    lr = 0.001
     epochs = 10
     printerval = 1
     patience = 3
@@ -14,9 +14,9 @@ def main():
     device = torch_utils.select_device()
     torch_utils.init_seeds()
 
-    mat = scipy.io.loadmat('data/sandd_training_data.mat')
-    x = mat['waveforms']  # inputs (nx512) [waveform1 waveform2]
-    y = mat['targets'].ravel()  # outputs (nx4) [position(mm), time(ns), PE, E(MeV)]
+    mat = scipy.io.loadmat("data/sandd_training_data.mat")
+    x = mat["waveforms"]  # inputs (nx512) [waveform1 waveform2]
+    y = mat["targets"].ravel()  # outputs (nx4) [position(mm), time(ns), PE, E(MeV)]
     nz, nx = x.shape
     ny = y.shape
 
@@ -71,7 +71,5 @@ def main():
             break
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
-

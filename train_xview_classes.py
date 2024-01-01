@@ -13,18 +13,78 @@ from utils.utils import *
 # cd mnist && python3 train_xview_classes.py -run_name '10pad_64f_5leaky.pt' -resume 1
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-h5_name', default='../chips_10pad_square.h5', help='h5 filename')
-parser.add_argument('-run_name', default='10pad_64f_5leaky.pt', help='run name')
-parser.add_argument('-resume', default=False, help='resume training flag')
+parser.add_argument("-h5_name", default="../chips_10pad_square.h5", help="h5 filename")
+parser.add_argument("-run_name", default="10pad_64f_5leaky.pt", help="run name")
+parser.add_argument("-resume", default=False, help="resume training flag")
 opt = parser.parse_args()
 print(opt)
 
 
 def xview_class_weights(indices):  # weights of each class in the training set, normalized to mu = 1
     weights = 1 / torch.FloatTensor(
-        [74, 364, 713, 71, 2925, 20976.7, 6925, 1101, 3612, 12134, 5871, 3640, 860, 4062, 895, 149, 174, 17, 1624, 1846,
-         125, 122, 124, 662, 1452, 697, 222, 190, 786, 200, 450, 295, 79, 205, 156, 181, 70, 64, 337, 1352, 336, 78,
-         628, 841, 287, 83, 702, 1177, 31386.5, 195, 1081, 882, 1059, 4175, 123, 1700, 2317, 1579, 368, 85])
+        [
+            74,
+            364,
+            713,
+            71,
+            2925,
+            20976.7,
+            6925,
+            1101,
+            3612,
+            12134,
+            5871,
+            3640,
+            860,
+            4062,
+            895,
+            149,
+            174,
+            17,
+            1624,
+            1846,
+            125,
+            122,
+            124,
+            662,
+            1452,
+            697,
+            222,
+            190,
+            786,
+            200,
+            450,
+            295,
+            79,
+            205,
+            156,
+            181,
+            70,
+            64,
+            337,
+            1352,
+            336,
+            78,
+            628,
+            841,
+            287,
+            83,
+            702,
+            1177,
+            31386.5,
+            195,
+            1081,
+            882,
+            1059,
+            4175,
+            123,
+            1700,
+            2317,
+            1579,
+            368,
+            85,
+        ]
+    )
     weights /= weights.sum()
     return weights[indices]
 
@@ -35,25 +95,26 @@ class ConvNetb(nn.Module):
         super(ConvNetb, self).__init__()
         n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(n),
-            nn.LeakyReLU())
+            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False), nn.BatchNorm2d(n), nn.LeakyReLU()
+        )
         self.layer2 = nn.Sequential(
-            nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(n * 2),
-            nn.LeakyReLU())
+            nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False), nn.BatchNorm2d(n * 2), nn.LeakyReLU()
+        )
         self.layer3 = nn.Sequential(
             nn.Conv2d(n * 2, n * 4, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 4),
-            nn.LeakyReLU())
+            nn.LeakyReLU(),
+        )
         self.layer4 = nn.Sequential(
             nn.Conv2d(n * 4, n * 8, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 8),
-            nn.LeakyReLU())
+            nn.LeakyReLU(),
+        )
         self.layer5 = nn.Sequential(
             nn.Conv2d(n * 8, n * 16, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(n * 16),
-            nn.LeakyReLU())
+            nn.LeakyReLU(),
+        )
         # self.layer6 = nn.Sequential(
         #     nn.Conv2d(n * 16, n * 32, kernel_size=3, stride=2, padding=1, bias=False),
         #     nn.BatchNorm2d(n * 32),
@@ -107,7 +168,7 @@ class ConvNetb(nn.Module):
 
 # @profile
 def main(model):
-    lr = .0001
+    lr = 0.0001
     epochs = 1000
     printerval = 1
     patience = 500
@@ -119,16 +180,17 @@ def main(model):
     rgb_std = torch.FloatTensor([29.99, 24.498, 22.046]).view((1, 3, 1, 1)).to(device)
 
     # load < 2GB .mat files with scipy.io
-    print('loading data...')
+    print("loading data...")
     # mat = scipy.io.loadmat('/Users/glennjocher/Documents/PyCharmProjects/yolo/utils/class_chips48.mat')
     # X = np.ascontiguousarray(mat['X'])  # 596154x3x32x32
     # Y = np.ascontiguousarray(mat['Y'])
 
     # load > 2GB .mat files with h5py
     import h5py
+
     with h5py.File(opt.h5_name) as h5:
-        X = h5.get('X').value
-        Y = h5.get('Y').value
+        X = h5.get("X").value
+        Y = h5.get("Y").value
 
     # # load with pickle
     # pickle.dump({'X': X, 'Y': Y}, open('save.p', "wb"), protocol=4)
@@ -144,27 +206,27 @@ def main(model):
 
     # Load saved model
     start_epoch = 0
-    best_loss = float('inf')
+    best_loss = float("inf")
     nGPU = torch.cuda.device_count()
     if opt.resume:
         checkpoint = torch.load(opt.run_name, map_location=device)
 
-        model.load_state_dict(checkpoint['model'])
+        model.load_state_dict(checkpoint["model"])
         if nGPU > 1:
-            print('%g GPUs found.' % nGPU)
+            print("%g GPUs found." % nGPU)
             model = nn.DataParallel(model)
         model.to(device).train()
 
         # Set optimizer
         optimizer = torch.optim.Adam(model.parameters())
-        optimizer.load_state_dict(checkpoint['optimizer'])
+        optimizer.load_state_dict(checkpoint["optimizer"])
 
-        start_epoch = checkpoint['epoch'] + 1
-        best_loss = checkpoint['best_loss']
+        start_epoch = checkpoint["epoch"] + 1
+        best_loss = checkpoint["best_loss"]
         del checkpoint
     else:
         if nGPU > 1:
-            print('%g GPUs found.' % nGPU)
+            print("%g GPUs found." % nGPU)
             model = nn.DataParallel(model)
         model.to(device).train()
 
@@ -211,7 +273,6 @@ def main(model):
 
             # x = x.transpose([0, 2, 3, 1])  # torch to cv2
             for j in range(batch_size):
-
                 augment_hsv = False
                 if augment_hsv:
                     # SV augmentation by 50%
@@ -234,8 +295,9 @@ def main(model):
                     img_hsv[:, :, 2] = V.astype(np.uint8)
                     cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
 
-                M = random_affine(degrees=(-179.9, 179.9), translate=(.15, .15), scale=(.75, 1.40), shear=(-3, 3),
-                                  shape=shape)
+                M = random_affine(
+                    degrees=(-179.9, 179.9), translate=(0.15, 0.15), scale=(0.75, 1.40), shear=(-3, 3), shape=shape
+                )
 
                 x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR)
                 # borderValue=[60.134, 49.697, 40.746])  # RGB
@@ -291,7 +353,7 @@ def main(model):
         nS = len(Y_test)
         v = np.random.permutation(nS)
         for batch in range(int(nS / batch_size)):
-            i = v[batch * batch_size:np.minimum((batch + 1) * batch_size, nS)]  # ordered chip selection
+            i = v[batch * batch_size : np.minimum((batch + 1) * batch_size, nS)]  # ordered chip selection
             # i = np.random.choice(nS, size=batch_size, p=weights)  # weighted chip selection
             x, y = X_test[i], Y_test[i]
 
@@ -326,19 +388,30 @@ def main(model):
         # Save best checkpoint
         if (epoch > 0) & (loss_test.item() < best_loss):
             best_loss = loss_test.item()
-            torch.save({'epoch': epoch,
-                        'best_loss': best_loss,
-                        'accuracy': accuracy_test,
-                        'model': model.state_dict(),
-                        'optimizer': optimizer.state_dict()},
-                       opt.run_name)
+            torch.save(
+                {
+                    "epoch": epoch,
+                    "best_loss": best_loss,
+                    "accuracy": accuracy_test,
+                    "model": model.state_dict(),
+                    "optimizer": optimizer.state_dict(),
+                },
+                opt.run_name,
+            )
 
-        if stopper.step(loss, metrics=(*accuracy.mean().view(1), loss_test, *accuracy_test.mean().view(1),),
-                        model=model):
+        if stopper.step(
+            loss,
+            metrics=(
+                *accuracy.mean().view(1),
+                loss_test,
+                *accuracy_test.mean().view(1),
+            ),
+            model=model,
+        ):
             break
 
 
-def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=(-2, 2), shape=(0, 0)):
+def random_affine(degrees=(-10, 10), translate=(0.1, 0.1), scale=(0.9, 1.1), shear=(-2, 2), shape=(0, 0)):
     # torchvision.transforms.RandomAffine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=(-10, 10))
     # https://medium.com/uruvideo/dataset-augmentation-with-random-homographies-a8f4b44830d4
 
@@ -364,14 +437,15 @@ def random_affine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=
     return M
 
 
-def strip_optimizer_from_checkpoint(filename='checkpoints/best.pt'):
+def strip_optimizer_from_checkpoint(filename="checkpoints/best.pt"):
     import torch
-    a = torch.load(filename, map_location='cpu')
-    a['optimizer'] = []
-    torch.save(a, filename.replace('.pt', '_lite.pt'))
+
+    a = torch.load(filename, map_location="cpu")
+    a["optimizer"] = []
+    torch.save(a, filename.replace(".pt", "_lite.pt"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(ConvNetb())
 
 # Fully Convolutional
