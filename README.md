@@ -5,6 +5,8 @@
 
 Welcome to the repository containing innovative software developed by Ultralytics 🧠. Our code is 🌟 **open-sourced and freely available for redistribution under the AGPL-3.0 license**. For more insight into our work and impact, head over to https://www.ultralytics.com.
 
+[![Ultralytics Actions](https://github.com/ultralytics/mnist/actions/workflows/format.yml/badge.svg)](https://github.com/ultralytics/mnist/actions/workflows/format.yml)
+
 # 📗 Description
 
 The repository at https://github.com/ultralytics/mnist is our dedicated playground for the MNIST dataset. 🖐 This repository houses sandbox code that allows for experimentation and training of different neural network architectures on the famous MNIST digit database.
