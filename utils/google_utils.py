@@ -13,10 +13,7 @@ def gdrive_download(id="1HaXkef9z6y5l4vUnCYgdmEAj61c6bfWO", name="coco.zip"):
     # from utils.google_utils import *; gdrive_download()
     t = time.time()
 
-    print(
-        f"Downloading https://drive.google.com/uc?export=download&id={id} as {name}... ",
-        end=""
-    )
+    print(f"Downloading https://drive.google.com/uc?export=download&id={id} as {name}... ", end="")
     if os.path.exists(name):  # remove existing
         os.remove(name)
 
