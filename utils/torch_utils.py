@@ -17,7 +17,7 @@ def select_device(device="", apex=False, batch_size=None):
     cpu_request = device.lower() == "cpu"
     if device and not cpu_request:  # if device requested other than 'cpu'
         os.environ["CUDA_VISIBLE_DEVICES"] = device  # set environment variable
-        assert torch.cuda.is_available(), "CUDA unavailable, invalid device %s requested" % device  # check availability
+        assert torch.cuda.is_available(), f"CUDA unavailable, invalid device {device} requested"
 
     cuda = False if cpu_request else torch.cuda.is_available()
     if cuda:
@@ -27,7 +27,7 @@ def select_device(device="", apex=False, batch_size=None):
             assert batch_size % ng == 0, "batch-size %g not multiple of GPU count %g" % (batch_size, ng)
         x = [torch.cuda.get_device_properties(i) for i in range(ng)]
         s = "Using CUDA " + ("Apex " if apex else "")  # apex for mixed precision https://github.com/NVIDIA/apex
-        for i in range(0, ng):
+        for i in range(ng):
             if i == 1:
                 s = " " * len(s)
             print(
@@ -60,10 +60,7 @@ def fuse_conv_and_bn(conv, bn):
         fusedconv.weight.copy_(torch.mm(w_bn, w_conv).view(fusedconv.weight.size()))
 
         # prepare spatial bias
-        if conv.bias is not None:
-            b_conv = conv.bias
-        else:
-            b_conv = torch.zeros(conv.weight.size(0))
+        b_conv = torch.zeros(conv.weight.size(0)) if conv.bias is None else conv.bias
         b_bn = bn.bias - bn.weight.mul(bn.running_mean).div(torch.sqrt(bn.running_var + bn.eps))
         fusedconv.bias.copy_(torch.mm(w_bn, b_conv.reshape(-1, 1)).reshape(-1) + b_bn)
 
@@ -74,7 +71,7 @@ def model_info(model, report="summary"):
     # Plots a line-by-line description of a PyTorch model
     n_p = sum(x.numel() for x in model.parameters())  # number parameters
     n_g = sum(x.numel() for x in model.parameters() if x.requires_grad)  # number gradients
-    if report is "full":
+    if report == "full":
         print("%5s %40s %9s %12s %20s %10s %10s" % ("layer", "name", "gradient", "parameters", "shape", "mu", "sigma"))
         for i, (name, p) in enumerate(model.named_parameters()):
             name = name.replace("module_list.", "")
@@ -93,7 +90,7 @@ def load_classifier(name="resnet101", n=2):
 
     # Display model properties
     for x in ["model.input_size", "model.input_space", "model.input_range", "model.mean", "model.std"]:
-        print(x + " =", eval(x))
+        print(f"{x} =", eval(x))
 
     # Reshape output to n classes
     filters = model.last_linear.weight.shape[1]

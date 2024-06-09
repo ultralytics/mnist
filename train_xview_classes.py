@@ -433,8 +433,7 @@ def random_affine(degrees=(-10, 10), translate=(0.1, 0.1), scale=(0.9, 1.1), she
     S[0, 1] = math.tan((random.random() * (shear[1] - shear[0]) + shear[0]) * math.pi / 180)  # x shear (deg)
     S[1, 0] = math.tan((random.random() * (shear[1] - shear[0]) + shear[0]) * math.pi / 180)  # y shear (deg)
 
-    M = S @ T @ R  # ORDER IS IMPORTANT HERE!!
-    return M
+    return S @ T @ R  # ORDER IS IMPORTANT HERE!!
 
 
 def strip_optimizer_from_checkpoint(filename="checkpoints/best.pt"):

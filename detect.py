@@ -1,8 +1,10 @@
-import torch
+import glob
+
 import cv2
 import numpy as np
+import torch
 from tqdm import tqdm
-import glob
+
 from utils import torch_utils
 
 device = torch_utils.select_device()
@@ -18,7 +20,7 @@ model.eval()
 dir = "./samples"
 results = []
 with torch.no_grad():
-    for file in tqdm(glob.glob("%s/*.*" % dir)[:9000]):
+    for file in tqdm(glob.glob(f"{dir}/*.*")[:9000]):
         img = cv2.resize(cv2.imread(file), (128, 128))  # BGR
         img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
         img = np.expand_dims(img, axis=0)  # add batch dim

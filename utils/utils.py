@@ -38,8 +38,7 @@ def create_batches(x, y, batch_size=1000, shuffle=False):
     else:  # is pytorch
         x = x.view(nb, batch_size, *x.shape[1:])
         y = y.view(nb, batch_size, *y.shape[1:])
-    batches = [(x[i], y[i]) for i in range(nb)]
-    return batches
+    return [(x[i], y[i]) for i in range(nb)]
 
 
 def normalize(x, axis=None):  # normalize x mean and std by axis
