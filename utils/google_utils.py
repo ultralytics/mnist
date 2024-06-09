@@ -4,7 +4,6 @@
 import os
 import time
 
-
 # from google.cloud import storage
 
 
@@ -14,34 +13,37 @@ def gdrive_download(id="1HaXkef9z6y5l4vUnCYgdmEAj61c6bfWO", name="coco.zip"):
     # from utils.google_utils import *; gdrive_download()
     t = time.time()
 
-    print("Downloading https://drive.google.com/uc?export=download&id=%s as %s... " % (id, name), end="")
+    print(
+        f"Downloading https://drive.google.com/uc?export=download&id={id} as {name}... ",
+        end="",
+    )
     if os.path.exists(name):  # remove existing
         os.remove(name)
 
     # Attempt large file download
     s = [
-        'curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=%s" > /dev/null' % id,
+        f'curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id={id}" > /dev/null',
         "curl -Lb ./cookie -s \"https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=%s\" -o %s"
         % (id, name),
         "rm ./cookie",
     ]
-    r = sum([os.system(x) for x in s])  # run commands, get return zeros
+    r = sum(os.system(x) for x in s)
 
     # Attempt small file download
     if not os.path.exists(name):  # file size < 40MB
-        s = "curl -f -L -o %s https://drive.google.com/uc?export=download&id=%s" % (name, id)
+        s = f"curl -f -L -o {name} https://drive.google.com/uc?export=download&id={id}"
         r = os.system(s)
 
     # Error check
     if r != 0:
-        os.system("rm " + name)  # remove partial downloads
+        os.system(f"rm {name}")
         print("ERROR: Download failure ")
         return r
 
     # Unzip if archive
     if name.endswith(".zip"):
         print("unzipping... ", end="")
-        os.system("unzip -q %s" % name)  # unzip
+        os.system(f"unzip -q {name}")
         os.remove(name)  # remove zip to free space
 
     print("Done (%.1fs)" % (time.time() - t))
@@ -58,7 +60,7 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 
     blob.upload_from_filename(source_file_name)
 
-    print("File {} uploaded to {}.".format(source_file_name, destination_blob_name))
+    print(f"File {source_file_name} uploaded to {destination_blob_name}.")
 
 
 def download_blob(bucket_name, source_blob_name, destination_file_name):
@@ -69,4 +71,4 @@ def download_blob(bucket_name, source_blob_name, destination_file_name):
 
     blob.download_to_filename(destination_file_name)
 
-    print("Blob {} downloaded to {}.".format(source_blob_name, destination_file_name))
+    print(f"Blob {source_blob_name} downloaded to {destination_file_name}.")
