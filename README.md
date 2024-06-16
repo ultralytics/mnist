@@ -38,7 +38,7 @@ import torch
 # ...
 
 # Save your trained model
-torch.save(model.state_dict(), 'path_to_save_model.pt')
+torch.save(model.state_dict(), "path_to_save_model.pt")
 
 # Add suitable comments to each segment of your code for better understanding.
 ```
