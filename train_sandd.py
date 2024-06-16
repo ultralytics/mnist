@@ -17,7 +17,6 @@ def main():
     x = mat["waveforms"]  # inputs (nx512) [waveform1 waveform2]
     y = mat["targets"].ravel()  # outputs (nx4) [position(mm), time(ns), PE, E(MeV)]
     nz, nx = x.shape
-    ny = y.shape
 
     x, _, _ = normalize(x, 1)  # normalize each input row
     # y, ymu, ys = normalize(y, 0)  # normalize each output column
