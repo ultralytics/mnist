@@ -1,5 +1,4 @@
 import scipy.io
-
 from models import *
 from utils.utils import *
 
@@ -8,6 +7,7 @@ from utils.utils import *
 
 
 def main(model):
+    """Trains and evaluates the given model on the MNIST dataset using custom training and testing loops."""
     lr = 0.001
     epochs = 20
     printerval = 1
