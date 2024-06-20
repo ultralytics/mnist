@@ -4,6 +4,7 @@ import torch
 
 
 def init_seeds(seed=0):
+    """Initialize random seeds for reproducibility and set CUDA deterministic behavior."""
     torch.manual_seed(seed)
 
     # Remove randomness (may be slower on Tesla GPUs) # https://pytorch.org/docs/stable/notes/randomness.html
@@ -13,7 +14,7 @@ def init_seeds(seed=0):
 
 
 def select_device(device="", apex=False, batch_size=None):
-    # device = 'cpu' or '0' or '0,1,2,3'
+    """Select and configure the computational device (CPU or CUDA GPUs) for PyTorch operations."""
     cpu_request = device.lower() == "cpu"
     if device and not cpu_request:  # if device requested other than 'cpu'
         os.environ["CUDA_VISIBLE_DEVICES"] = device  # set environment variable
@@ -42,7 +43,11 @@ def select_device(device="", apex=False, batch_size=None):
 
 
 def fuse_conv_and_bn(conv, bn):
-    # https://tehnokv.com/posts/fusing-batchnorm-and-conv/
+    """
+    Fuses a convolutional layer and a batch normalization layer into a single convolutional layer.
+
+    https://tehnokv.com/posts/fusing-batchnorm-and-conv/
+    """
     with torch.no_grad():
         # init
         fusedconv = torch.nn.Conv2d(
@@ -68,7 +73,9 @@ def fuse_conv_and_bn(conv, bn):
 
 
 def model_info(model, report="summary"):
-    # Plots a line-by-line description of a PyTorch model
+    """Prints a summary or full report of a PyTorch model's layers, parameters, gradients, shapes, mean, and standard
+    deviation.
+    """
     n_p = sum(x.numel() for x in model.parameters())  # number parameters
     n_g = sum(x.numel() for x in model.parameters() if x.requires_grad)  # number gradients
     if report == "full":
@@ -83,7 +90,7 @@ def model_info(model, report="summary"):
 
 
 def load_classifier(name="resnet101", n=2):
-    # Loads a pretrained model reshaped to n-class output
+    """Loads a pretrained model reshaped to n-class output using the specified model architecture."""
     import pretrainedmodels  # https://github.com/Cadene/pretrained-models.pytorch#torchvision
 
     model = pretrainedmodels.__dict__[name](num_classes=1000, pretrained="imagenet")

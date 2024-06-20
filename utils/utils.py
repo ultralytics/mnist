@@ -13,12 +13,14 @@ np.set_printoptions(linewidth=320, formatter={"float_kind": "{:11.5g}".format}) 
 
 
 def init_seeds(seed=0):
+    """Initialize random seeds for reproducibility across various libraries."""
     random.seed(seed)
     np.random.seed(seed)
     torch_utils.init_seeds(seed=seed)
 
 
 def create_batches(x, y, batch_size=1000, shuffle=False):
+    """Generate batches from input data `x` and `y` with optional shuffle and specified batch size."""
     if shuffle:
         # shuffle_data(x, y)
         rng_state = np.random.get_state()
@@ -42,6 +44,7 @@ def create_batches(x, y, batch_size=1000, shuffle=False):
 
 
 def normalize(x, axis=None):  # normalize x mean and std by axis
+    """Normalize input array x along the specified axis, returning normalized array, mean, and standard deviation."""
     if axis is None:
         mu, sigma = x.mean(), x.std()
     elif axis == 0:
@@ -52,6 +55,7 @@ def normalize(x, axis=None):  # normalize x mean and std by axis
 
 
 def shuffle_data(x, y):  # randomly shuffle x and y by same axis=0 indices. no need to return values, shuffled in place
+    """Randomly shuffle the arrays x and y in place along the same axis=0 indices."""
     rng_state = np.random.get_state()
     np.random.shuffle(x)
     np.random.set_state(rng_state)
@@ -59,6 +63,9 @@ def shuffle_data(x, y):  # randomly shuffle x and y by same axis=0 indices. no n
 
 
 def split_data(x, y, train=0.7, validate=0.15, test=0.15, shuffle=False):  # split training data
+    """Splits arrays x and y into training, validation, and test sets with specified ratios, optionally shuffling
+    them.
+    """
     n = x.shape[0]
     if shuffle:
         shuffle_data(x, y)
@@ -70,6 +77,7 @@ def split_data(x, y, train=0.7, validate=0.15, test=0.15, shuffle=False):  # spl
 
 class patienceStopper(object):
     def __init__(self, patience=10, verbose=True, epochs=1000, printerval=10, spa_start=float("inf")):
+        """Initialize patienceStopper with given parameters for controlling early stopping in model training."""
         self.patience = patience
         self.verbose = verbose
         self.bestepoch = 0
@@ -84,11 +92,15 @@ class patienceStopper(object):
         self.spamodel = None
 
     def reset(self):
+        """Resets training state variables including best loss, best metrics, and number of bad epochs."""
         self.bestloss = float("inf")
         self.bestmetrics = None
         self.num_bad_epochs = 0
 
     def step(self, loss, metrics=None, model=None):
+        """Updates training state variables and logs progress for each epoch, optionally handling metrics and model
+        state.
+        """
         loss = loss.item()
         self.num_bad_epochs += 1
         self.epoch += 1
@@ -128,12 +140,14 @@ class patienceStopper(object):
             return False
 
     def first(self, model):
+        """Logs model information and prints the header for training metrics."""
         if model:
             torch_utils.model_info(model)
         s = ("epoch", "time", "loss", "metric(s)")
         print("%12s" * len(s) % s)
 
     def printepoch(self, epoch, loss, metrics):
+        """Prints and logs epoch number, elapsed time, loss, and metrics during training."""
         s = (epoch, time.time() - self.t, loss)
         if metrics is not None:
             for i in range(len(metrics)):
@@ -145,6 +159,7 @@ class patienceStopper(object):
         self.t = time.time()
 
     def final(self, msg):
+        """Prints and logs the final training summary including total epochs, time taken, and best metrics."""
         dt = time.time() - self.t0
         print(
             "%s\nFinished %g epochs in %.3fs (%.3f epochs/s). Best results:"

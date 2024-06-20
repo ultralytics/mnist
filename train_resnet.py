@@ -9,6 +9,9 @@ from utils.utils import *
 
 
 def main(model):
+    """Trains a model on a binary classifier dataset and evaluates it, saving the best model state to Google Cloud
+    Storage.
+    """
     lr = 0.0005
     epochs = 10
     printerval = 1

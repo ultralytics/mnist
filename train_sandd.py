@@ -5,6 +5,7 @@ from utils.utils import *
 
 
 def main():
+    """Train and evaluate the SANDD model on waveform data from a .mat file with specified hyperparameters."""
     lr = 0.001
     epochs = 10
     printerval = 1

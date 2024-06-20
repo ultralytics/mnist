@@ -21,6 +21,7 @@ print(opt)
 
 
 def xview_class_weights(indices):  # weights of each class in the training set, normalized to mu = 1
+    """Compute and return the normalized class weights for given indices in the xView dataset training set."""
     weights = 1 / torch.FloatTensor(
         [
             74,
@@ -92,6 +93,9 @@ def xview_class_weights(indices):  # weights of each class in the training set, 
 # https://github.com/yunjey/pytorch-tutorial/tree/master/tutorials/02-intermediate
 class ConvNetb(nn.Module):
     def __init__(self, num_classes=60):
+        """Initializes the ConvNetb model with convolutional, batch normalization, and LeakyReLU layers, setting the
+        number of classes.
+        """
         super(ConvNetb, self).__init__()
         n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
@@ -125,7 +129,7 @@ class ConvNetb(nn.Module):
         self.fully_conv = nn.Conv2d(n * 16, num_classes, kernel_size=4, stride=1, padding=0, bias=True)  # 5 layer s1
 
     def forward(self, x):  # 500 x 1 x 64 x 64
-        # # transformations
+        """Performs a forward pass through the network with input tensor x of shape (500 x 1 x 64 x 64)."""
         # xa = [x]  # 0 rot
         # xa.append(x.flip(2).flip(3))  # 180 rot
         # xa.append(x.transpose(2, 3).flip(2))  # -90 rot
@@ -168,6 +172,7 @@ class ConvNetb(nn.Module):
 
 # @profile
 def main(model):
+    """Execute training and testing loop for the model with dataset loading, preprocessing, and checkpoint saving."""
     lr = 0.0001
     epochs = 1000
     printerval = 1
@@ -412,7 +417,9 @@ def main(model):
 
 
 def random_affine(degrees=(-10, 10), translate=(0.1, 0.1), scale=(0.9, 1.1), shear=(-2, 2), shape=(0, 0)):
-    # torchvision.transforms.RandomAffine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=(-10, 10))
+    """Apply random affine transformations including rotation, translation, scaling, and shearing to an image with a
+    given shape.
+    """
     # https://medium.com/uruvideo/dataset-augmentation-with-random-homographies-a8f4b44830d4
 
     # Rotation and Scale
@@ -437,6 +444,7 @@ def random_affine(degrees=(-10, 10), translate=(0.1, 0.1), scale=(0.9, 1.1), she
 
 
 def strip_optimizer_from_checkpoint(filename="checkpoints/best.pt"):
+    """Removes the optimizer from the checkpoint file to reduce its size and saves the modified checkpoint."""
     import torch
 
     a = torch.load(filename, map_location="cpu")
