@@ -5,7 +5,7 @@
 
 Welcome to the repository containing innovative software developed by Ultralytics 🧠. Our code is 🌟 **open-sourced and freely available for redistribution under the AGPL-3.0 license**. For more insight into our work and impact, head over to https://www.ultralytics.com.
 
-[![Ultralytics Actions](https://github.com/ultralytics/mnist/actions/workflows/format.yml/badge.svg)](https://github.com/ultralytics/mnist/actions/workflows/format.yml)
+[![Ultralytics Actions](https://github.com/ultralytics/mnist/actions/workflows/format.yml/badge.svg)](https://github.com/ultralytics/mnist/actions/workflows/format.yml) <a href="https://ultralytics.com/discord"><img alt="Discord" src="https://img.shields.io/discord/1089800235347353640?logo=discord&logoColor=white&label=Discord&color=blue"></a> <a href="https://community.ultralytics.com"><img alt="Ultralytics Forums" src="https://img.shields.io/discourse/users?server=https%3A%2F%2Fcommunity.ultralytics.com&logo=discourse&label=Forums&color=blue"></a>
 
 # 📗 Description
 
