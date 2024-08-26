@@ -3,6 +3,8 @@ import torch.nn.functional as F
 
 
 class SANDD(nn.Module):
+    """Implements a convolutional neural network for signal anomaly detection and diagnosis (SANDD)."""
+
     def __init__(self, n_out=2):
         """Initializes the SANDD model with optional output layer size."""
         super(SANDD, self).__init__()
@@ -34,6 +36,8 @@ class SANDD(nn.Module):
 
 #       121  2.6941e-05    0.021642      11.923     0.14201  # var 1
 class WAVE2(nn.Module):
+    """A CNN model for processing 2D input data with batch normalization, activation, and pooling layers."""
+
     def __init__(self, n_out=2):
         """Initializes the WAVE2 model with convolutional, batch normalization, activation, and pooling layers."""
         super(WAVE2, self).__init__()
@@ -66,6 +70,8 @@ class WAVE2(nn.Module):
 # Epoch 25: 98.60% test accuracy, 0.0555 test loss (normalize after relu)
 # Epoch 11: 98.48% test accuracy, 0.0551 test loss (normalize after both)
 class MLP(nn.Module):
+    """A simple MLP model with two fully connected layers for classification tasks."""
+
     def __init__(self):
         """Initialize MLP model with two fully connected layers."""
         super(MLP, self).__init__()
@@ -84,6 +90,8 @@ class MLP(nn.Module):
 
 # 178  9.2745e-05    0.024801        99.2 default no augmentation
 class ConvNeta(nn.Module):
+    """A convolutional neural network model with dropout and fully connected layers for image classification tasks."""
+
     def __init__(self):
         """Initializes the ConvNeta neural network architecture with convolutional, dropout, and fully connected
         layers.
@@ -113,6 +121,8 @@ class ConvNeta(nn.Module):
 # 124      14.438    0.012876       99.55  LeakyReLU in place of ReLU
 # 190  0.00059581    0.013831       99.58  default
 class ConvNetb(nn.Module):
+    """Implements a CNN with two convolutional layers and a fully connected layer for classification tasks."""
+
     def __init__(self, num_classes=10):
         """Initialize ConvNetb layers with given number of output classes."""
         super(ConvNetb, self).__init__()

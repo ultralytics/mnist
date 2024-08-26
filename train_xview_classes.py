@@ -92,6 +92,8 @@ def xview_class_weights(indices):  # weights of each class in the training set, 
 
 # https://github.com/yunjey/pytorch-tutorial/tree/master/tutorials/02-intermediate
 class ConvNetb(nn.Module):
+    """A CNN model for image classification with Conv2d, BatchNorm2d, and LeakyReLU layers."""
+
     def __init__(self, num_classes=60):
         """Initializes the ConvNetb model with convolutional, batch normalization, and LeakyReLU layers, setting the
         number of classes.
