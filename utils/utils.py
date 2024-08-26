@@ -76,6 +76,8 @@ def split_data(x, y, train=0.7, validate=0.15, test=0.15, shuffle=False):  # spl
 
 
 class patienceStopper(object):
+    """Implements early stopping mechanism to halt training when performance stops improving, preventing overfitting."""
+
     def __init__(self, patience=10, verbose=True, epochs=1000, printerval=10, spa_start=float("inf")):
         """Initialize patienceStopper with given parameters for controlling early stopping in model training."""
         self.patience = patience
