@@ -98,7 +98,7 @@ class ConvNetb(nn.Module):
         """Initializes the ConvNetb model with convolutional, batch normalization, and LeakyReLU layers, setting the
         number of classes.
         """
-        super(ConvNetb, self).__init__()
+        super().__init__()
         n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False), nn.BatchNorm2d(n), nn.LeakyReLU()
@@ -220,7 +220,7 @@ def main(model):
 
         model.load_state_dict(checkpoint["model"])
         if nGPU > 1:
-            print("%g GPUs found." % nGPU)
+            print(f"{nGPU:g} GPUs found.")
             model = nn.DataParallel(model)
         model.to(device).train()
 
@@ -233,7 +233,7 @@ def main(model):
         del checkpoint
     else:
         if nGPU > 1:
-            print("%g GPUs found." % nGPU)
+            print(f"{nGPU:g} GPUs found.")
             model = nn.DataParallel(model)
         model.to(device).train()
 

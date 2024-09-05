@@ -25,7 +25,7 @@ def select_device(device="", apex=False, batch_size=None):
         c = 1024**2  # bytes to MB
         ng = torch.cuda.device_count()
         if ng > 1 and batch_size:  # check that batch_size is compatible with device_count
-            assert batch_size % ng == 0, "batch-size %g not multiple of GPU count %g" % (batch_size, ng)
+            assert batch_size % ng == 0, f"batch-size {batch_size:g} not multiple of GPU count {ng:g}"
         x = [torch.cuda.get_device_properties(i) for i in range(ng)]
         s = "Using CUDA " + ("Apex " if apex else "")  # apex for mixed precision https://github.com/NVIDIA/apex
         for i in range(ng):
@@ -86,7 +86,7 @@ def model_info(model, report="summary"):
                 "%5g %40s %9s %12g %20s %10.3g %10.3g"
                 % (i, name, p.requires_grad, p.numel(), list(p.shape), p.mean(), p.std())
             )
-    print("Model Summary: %g layers, %g parameters, %g gradients" % (len(list(model.parameters())), n_p, n_g))
+    print(f"Model Summary: {len(list(model.parameters())):g} layers, {n_p:g} parameters, {n_g:g} gradients")
 
 
 def load_classifier(name="resnet101", n=2):

@@ -31,7 +31,7 @@ def create_batches(x, y, batch_size=1000, shuffle=False):
     nb = x.shape[0] // batch_size  # number of batches
     remainder = x.shape[0] % batch_size  # number of remainder samples
     if remainder != 0:
-        print("Warning: dataset size %g indivisible by batch size %g, %g extra." % (x.shape[0], batch_size, remainder))
+        print(f"Warning: dataset size {x.shape[0]:g} indivisible by batch size {batch_size:g}, {remainder:g} extra.")
         x, y = x[: nb * batch_size], y[: nb * batch_size]  # trim off extra data
 
     if type(x).__module__ == np.__name__:  # is numpy
@@ -75,7 +75,7 @@ def split_data(x, y, train=0.7, validate=0.15, test=0.15, shuffle=False):  # spl
     return x[:i], y[:i], x[i:j], y[i:j], x[j:k], y[j:k]  # xy train, xy validate, xy test
 
 
-class patienceStopper(object):
+class patienceStopper:
     """Implements early stopping mechanism to halt training when performance stops improving, preventing overfitting."""
 
     def __init__(self, patience=10, verbose=True, epochs=1000, printerval=10, spa_start=float("inf")):
@@ -133,10 +133,10 @@ class patienceStopper(object):
                 self.spamodel = copy.deepcopy(model)
 
         if self.num_bad_epochs > self.patience:
-            self.final("%g Patience exceeded at epoch %g." % (self.patience, self.epoch))
+            self.final(f"{self.patience:g} Patience exceeded at epoch {self.epoch:g}.")
             return True
         elif self.epoch >= self.epochs:
-            self.final("WARNING: %g Patience not exceeded by epoch %g (train longer)." % (self.patience, self.epoch))
+            self.final(f"WARNING: {self.patience:g} Patience not exceeded by epoch {self.epoch:g} (train longer).")
             return True
         else:
             return False
@@ -164,7 +164,6 @@ class patienceStopper(object):
         """Prints and logs the final training summary including total epochs, time taken, and best metrics."""
         dt = time.time() - self.t0
         print(
-            "%s\nFinished %g epochs in %.3fs (%.3f epochs/s). Best results:"
-            % (msg, self.epochs + 1, dt, (self.epochs + 1) / dt)
+            f"{msg}\nFinished {self.epochs + 1:g} epochs in {dt:.3f}s ({(self.epochs + 1) / dt:.3f} epochs/s). Best results:"
         )
         self.printepoch(self.bestepoch, self.bestloss, self.bestmetrics)

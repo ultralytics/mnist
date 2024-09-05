@@ -20,8 +20,7 @@ def gdrive_download(id="1HaXkef9z6y5l4vUnCYgdmEAj61c6bfWO", name="coco.zip"):
     # Attempt large file download
     s = [
         f'curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id={id}" > /dev/null',
-        "curl -Lb ./cookie -s \"https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=%s\" -o %s"
-        % (id, name),
+        f"curl -Lb ./cookie -s \"https://drive.google.com/uc?export=download&confirm=`awk '/download/ {{print $NF}}' ./cookie`&id={id}\" -o {name}",
         "rm ./cookie",
     ]
     r = sum(os.system(x) for x in s)
