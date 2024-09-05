@@ -7,7 +7,7 @@ class SANDD(nn.Module):
 
     def __init__(self, n_out=2):
         """Initializes the SANDD model with optional output layer size."""
-        super(SANDD, self).__init__()
+        super().__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(1, 32, kernel_size=(1, 30), stride=(1, 2), padding=(0, 15), bias=False),
             nn.BatchNorm2d(32),
@@ -40,7 +40,7 @@ class WAVE2(nn.Module):
 
     def __init__(self, n_out=2):
         """Initializes the WAVE2 model with convolutional, batch normalization, activation, and pooling layers."""
-        super(WAVE2, self).__init__()
+        super().__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(1, 32, kernel_size=(2, 30), stride=(1, 2), padding=(1, 15), bias=False),
             nn.BatchNorm2d(32),
@@ -74,7 +74,7 @@ class MLP(nn.Module):
 
     def __init__(self):
         """Initialize MLP model with two fully connected layers."""
-        super(MLP, self).__init__()
+        super().__init__()
         self.fc1 = nn.Linear(784, 500, bias=True)
         self.fc2 = nn.Linear(500, 10, bias=True)
 
@@ -96,7 +96,7 @@ class ConvNeta(nn.Module):
         """Initializes the ConvNeta neural network architecture with convolutional, dropout, and fully connected
         layers.
         """
-        super(ConvNeta, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
         self.conv2_drop = nn.Dropout2d()
@@ -125,7 +125,7 @@ class ConvNetb(nn.Module):
 
     def __init__(self, num_classes=10):
         """Initialize ConvNetb layers with given number of output classes."""
-        super(ConvNetb, self).__init__()
+        super().__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
