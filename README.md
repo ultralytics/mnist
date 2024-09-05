@@ -11,6 +11,8 @@ Welcome to the repository containing innovative software developed by Ultralytic
 
 The repository at https://github.com/ultralytics/mnist is our dedicated playground for the MNIST dataset. 🖐 This repository houses sandbox code that allows for experimentation and training of different neural network architectures on the famous MNIST digit database.
 
+![MNIST Examples](https://upload.wikimedia.org/wikipedia/commons/2/27/MnistExamples.png)
+
 # 📦 Requirements
 
 Ensure you have Python 3.7 or later installed on your machine. The following packages are required, and you can install them using pip with the provided command: `pip3 install -U -r requirements.txt`.
@@ -42,9 +44,6 @@ torch.save(model.state_dict(), "path_to_save_model.pt")
 
 # Add suitable comments to each segment of your code for better understanding.
 ```
-
-![MNIST Examples](https://upload.wikimedia.org/wikipedia/commons/2/27/MnistExamples.png%20%22MNIST%20digits%20example%22)\
-_Image credit: [Josef Steppan](//commons.wikimedia.org/w/index.php?title=User:Jost_swd15&action=edit&redlink=1 "User:Jost swd15 (page does not exist)") - [Own work](//commons.wikimedia.org/wiki/File:MnistExamples.png), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0%20%22creative%20commons%20attribution-share%20alike%204.0%22), [Link](https://commons.wikimedia.org/w/index.php?curid=64810040)_
 
 # 🤝 Contribute
 
