@@ -1,9 +1,10 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+
 import argparse
 import math
 
 import cv2
 import torch.nn as nn
-
 from utils.utils import *
 
 # Start New Training

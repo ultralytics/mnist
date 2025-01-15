@@ -1,10 +1,11 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+
 import glob
 
 import cv2
 import numpy as np
 import torch
 from tqdm import tqdm
-
 from utils import torch_utils
 
 device = torch_utils.select_device()

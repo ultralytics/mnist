@@ -1,10 +1,11 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+
 import glob
 import os
 
 import cv2
-from tqdm import tqdm
-
 from models import *
+from tqdm import tqdm
 from utils.utils import *
 
 
