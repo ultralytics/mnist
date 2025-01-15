@@ -1,7 +1,6 @@
 # Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
 import scipy.io
-
 from models import *
 from utils.utils import *
 
