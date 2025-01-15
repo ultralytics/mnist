@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import torch
 from tqdm import tqdm
+
 from utils import torch_utils
 
 device = torch_utils.select_device()
