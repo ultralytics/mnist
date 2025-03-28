@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
 # New VM
 rm -rf yolov3 weights coco
