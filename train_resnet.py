@@ -4,8 +4,9 @@ import glob
 import os
 
 import cv2
-from models import *
 from tqdm import tqdm
+
+from models import *
 from utils.utils import *
 
 

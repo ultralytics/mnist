@@ -10,7 +10,7 @@ git clone https://github.com/cocodataset/cocoapi && cd cocoapi/PythonAPI && make
 sudo shutdown
 
 # Re-clone
-rm -rf mnist  # Warning: remove existing
-git clone https://github.com/ultralytics/mnist  # master
+rm -rf mnist                                   # Warning: remove existing
+git clone https://github.com/ultralytics/mnist # master
 # git clone -b test --depth 1 https://github.com/ultralytics/mnist test  # branch
 #cp -r weights mnist && cd mnist
