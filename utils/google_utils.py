@@ -49,7 +49,8 @@ def gdrive_download(id="1HaXkef9z6y5l4vUnCYgdmEAj61c6bfWO", name="coco.zip"):
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
-    """Uploads a file to a bucket: https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python."""
+    """Uploads a file to a bucket: https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python.
+    """
     # https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python
 
     storage_client = storage.Client()
