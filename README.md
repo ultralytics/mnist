@@ -20,44 +20,34 @@ The repository at https://github.com/ultralytics/mnist is our dedicated playgrou
 Ensure you have Python 3.7 or later installed on your machine. The following packages are required, and you can install them using pip with the provided command: `pip3 install -U -r requirements.txt`.
 
 - `numpy`: A fundamental package for scientific computing in Python.
+- `scipy`: Used by `train.py` to load the bundled MATLAB `.mat` MNIST files.
 - `torch`: [PyTorch](https://pytorch.org/), an open-source machine learning library for Python.
 - `torchvision`: A PyTorch package that includes datasets and model architectures for [computer vision](https://www.ultralytics.com/glossary/computer-vision-cv).
 - `opencv-python`: An open-source computer vision and [machine learning](https://www.ultralytics.com/glossary/machine-learning-ml) software library.
+- `h5py`: Provides HDF5 file support for data workflows.
 
 # 🏃‍♂️ Run
 
-To start [training](https://docs.ultralytics.com/modes/train/) on the MNIST digits dataset, execute `train.py` from your Python environment. The training and test data are located in the `data/` folder and were initially curated by Yann LeCun (http://yann.lecun.com/exdb/mnist/).
+To start [training](https://docs.ultralytics.com/modes/train/) on the MNIST digits dataset, install the dependencies and execute `train.py` from the repository root:
 
-```python
-# Example snippet of train.py to showcase its usage.
-# This will set up the environment for training a model on MNIST dataset.
-
-# Import necessary libraries (Make sure they are installed as per requirements)
-import torch
-
-# Your training script will start here, initialize models, load data, etc.
-# ...
-
-# Start the training process
-# ...
-
-# Save your trained model
-torch.save(model.state_dict(), "path_to_save_model.pt")
-
-# Add suitable comments to each segment of your code for better understanding.
+```bash
+pip3 install -U -r requirements.txt
+python3 train.py
 ```
+
+The default script trains `ConvNetb` for 20 epochs using the bundled `data/MNISTtrain.mat` and `data/MNISTtest.mat` files, which were initially curated from Yann LeCun's [MNIST database](http://yann.lecun.com/exdb/mnist/). Additional experimental entry points include `train_resnet.py`, `train_sandd.py`, and `train_xview_classes.py`.
 
 # 🤝 Contribute
 
 We welcome contributions from the community! Whether you're fixing bugs, adding new features, or improving documentation, your input is invaluable. Take a look at our [Contributing Guide](https://docs.ultralytics.com/help/contributing/) to get started. Also, we'd love to hear about your experience with Ultralytics products. Please consider filling out our [Survey](https://www.ultralytics.com/survey?utm_source=github&utm_medium=social&utm_campaign=Survey). A huge 🙏 and thank you to all of our contributors!
 
-[![Ultralytics open-source contributors](https://raw.githubusercontent.com/ultralytics/assets/main/im/image-contributors.png)](https://github.com/ultralytics/ultralytics/graphs/contributors)
+[![Ultralytics open-source contributors](https://raw.githubusercontent.com/ultralytics/assets/main/im/image-contributors.png)](https://github.com/ultralytics/mnist/graphs/contributors)
 
 # ©️ License
 
 Ultralytics is excited to offer two different licensing options to meet your needs:
 
-- **AGPL-3.0 License**: Perfect for students and hobbyists, this [OSI-approved](https://opensource.org/license/) open-source license encourages collaborative learning and knowledge sharing. Please refer to the [LICENSE](https://github.com/ultralytics/ultralytics/blob/main/LICENSE) file for detailed terms.
+- **AGPL-3.0 License**: Perfect for students and hobbyists, this [OSI-approved](https://opensource.org/license/agpl-v3) open-source license encourages collaborative learning and knowledge sharing. Please refer to the [LICENSE](https://github.com/ultralytics/mnist/blob/main/LICENSE) file for detailed terms.
 - **Enterprise License**: Ideal for commercial use, this license allows for the integration of Ultralytics software and AI models into commercial products without the open-source requirements of AGPL-3.0. For use cases that involve commercial applications, please contact us via [Ultralytics Licensing](https://www.ultralytics.com/license).
 
 # 📬 Contact Us
