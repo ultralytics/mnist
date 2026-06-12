@@ -1,9 +1,12 @@
 # Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
 import scipy.io
+import torch
+import torch.nn as nn
 
-from models import *
-from utils.utils import *
+from models import SANDD
+from utils import torch_utils
+from utils.utils import create_batches, normalize, patienceStopper, split_data
 
 
 def main():
@@ -19,14 +22,18 @@ def main():
     mat = scipy.io.loadmat("data/sandd_training_data.mat")
     x = mat["waveforms"]  # inputs (nx512) [waveform1 waveform2]
     y = mat["targets"].ravel()  # outputs (nx4) [position(mm), time(ns), PE, E(MeV)]
-    nz, nx = x.shape
+    _nz, _nx = x.shape
 
     x, _, _ = normalize(x, 1)  # normalize each input row
     # y, ymu, ys = normalize(y, 0)  # normalize each output column
     x, y = torch.Tensor(x), torch.Tensor(y)
-    x, y, xv, yv, xt, yt = split_data(x, y, train=0.70, validate=0.0, test=0.30, shuffle=True)
+    x, y, _xv, _yv, xt, yt = split_data(
+        x, y, train=0.70, validate=0.0, test=0.30, shuffle=True
+    )
 
-    train_loader = create_batches(x=x, y=y.squeeze().long(), batch_size=batch_size, shuffle=True)
+    train_loader = create_batches(
+        x=x, y=y.squeeze().long(), batch_size=batch_size, shuffle=True
+    )
 
     test_data = torch.Tensor(xt), torch.Tensor(yt).squeeze().long().to(device)
     # test_loader2 = create_batches(dataset=test_data, batch_size=10000)

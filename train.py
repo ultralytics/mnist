@@ -1,9 +1,12 @@
 # Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
 import scipy.io
+import torch
+import torch.nn as nn
 
-from models import *
-from utils.utils import *
+from models import ConvNetb
+from utils import torch_utils
+from utils.utils import create_batches, patienceStopper
 
 # import torchvision
 # from torchvision import datasets, transforms
@@ -37,11 +40,17 @@ def main(model):
 
     mat = scipy.io.loadmat("data/MNISTtrain.mat")
     train_loader2 = create_batches(
-        x=torch.Tensor(mat["x"]), y=torch.Tensor(mat["y"]).squeeze().long(), batch_size=batch_size, shuffle=True
+        x=torch.Tensor(mat["x"]),
+        y=torch.Tensor(mat["y"]).squeeze().long(),
+        batch_size=batch_size,
+        shuffle=True,
     )
 
     mat = scipy.io.loadmat("data/MNISTtest.mat")
-    test_data = torch.Tensor(mat["x"]), torch.Tensor(mat["y"]).squeeze().long().to(device)
+    test_data = (
+        torch.Tensor(mat["x"]),
+        torch.Tensor(mat["y"]).squeeze().long().to(device),
+    )
     # test_loader2 = create_batches(dataset=test_data, batch_size=10000)
 
     model = model.to(device)
