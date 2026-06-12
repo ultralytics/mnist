@@ -2,11 +2,15 @@
 
 import argparse
 import math
+import random
 
 import cv2
+import numpy as np
+import torch
 import torch.nn as nn
 
-from utils.utils import *
+from utils import torch_utils
+from utils.utils import patienceStopper
 
 # Start New Training
 # sudo rm -rf mnist && git clone https://github.com/ultralytics/mnist && cd mnist && python3 train_xview_classes.py -run_name '5leaky64.pt'
@@ -22,7 +26,9 @@ opt = parser.parse_args()
 print(opt)
 
 
-def xview_class_weights(indices):  # weights of each class in the training set, normalized to mu = 1
+def xview_class_weights(
+    indices,
+):  # weights of each class in the training set, normalized to mu = 1
     """Compute and return the normalized class weights for given indices in the xView dataset training set."""
     weights = 1 / torch.FloatTensor(
         [
@@ -103,10 +109,14 @@ class ConvNetb(nn.Module):
         super().__init__()
         n = 64  # initial convolution size
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False), nn.BatchNorm2d(n), nn.LeakyReLU()
+            nn.Conv2d(3, n, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(n),
+            nn.LeakyReLU(),
         )
         self.layer2 = nn.Sequential(
-            nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False), nn.BatchNorm2d(n * 2), nn.LeakyReLU()
+            nn.Conv2d(n, n * 2, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(n * 2),
+            nn.LeakyReLU(),
         )
         self.layer3 = nn.Sequential(
             nn.Conv2d(n * 2, n * 4, kernel_size=3, stride=2, padding=1, bias=False),
@@ -239,7 +249,11 @@ def main(model):
             model = nn.DataParallel(model)
         model.to(device).train()
 
-        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, weight_decay=5e-4)
+        optimizer = torch.optim.Adam(
+            filter(lambda p: p.requires_grad, model.parameters()),
+            lr=lr,
+            weight_decay=5e-4,
+        )
 
     # Split data into train and test groups
     weights = xview_class_weights(range(60))[Y].numpy()
@@ -264,7 +278,7 @@ def main(model):
 
     criteria = nn.CrossEntropyLoss()  # weight=xview_class_weights(range(60)).to(device))
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
-    model_info(model)
+    torch_utils.model_info(model)
 
     border = 32
     shape = X.shape[1:3]
@@ -305,7 +319,11 @@ def main(model):
                     cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB, dst=x[j])
 
                 M = random_affine(
-                    degrees=(-179.9, 179.9), translate=(0.15, 0.15), scale=(0.75, 1.40), shear=(-3, 3), shape=shape
+                    degrees=(-179.9, 179.9),
+                    translate=(0.15, 0.15),
+                    scale=(0.75, 1.40),
+                    shear=(-3, 3),
+                    shape=shape,
                 )
 
                 x[j] = cv2.warpPerspective(x[j], M, dsize=shape, flags=cv2.INTER_LINEAR)
@@ -420,7 +438,13 @@ def main(model):
             break
 
 
-def random_affine(degrees=(-10, 10), translate=(0.1, 0.1), scale=(0.9, 1.1), shear=(-2, 2), shape=(0, 0)):
+def random_affine(
+    degrees=(-10, 10),
+    translate=(0.1, 0.1),
+    scale=(0.9, 1.1),
+    shear=(-2, 2),
+    shape=(0, 0),
+):
     """Apply random affine transformations including rotation, translation, scaling, and shearing to an image with a
     given shape.
     """

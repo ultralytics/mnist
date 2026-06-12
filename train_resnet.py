@@ -2,12 +2,16 @@
 
 import glob
 import os
+import random
 
 import cv2
+import numpy as np
+import torch
+import torch.nn as nn
 from tqdm import tqdm
 
-from models import *
-from utils.utils import *
+from utils import torch_utils
+from utils.utils import create_batches, patienceStopper, split_data
 
 
 def main(model):
@@ -66,7 +70,11 @@ def main(model):
     del x, y
 
     print("Creating Test Dataloader...")
-    test_loader = create_batches(x=torch.Tensor(xtest), y=torch.Tensor(ytest).squeeze().long(), batch_size=batch_size)
+    test_loader = create_batches(
+        x=torch.Tensor(xtest),
+        y=torch.Tensor(ytest).squeeze().long(),
+        batch_size=batch_size,
+    )
     del xtest, ytest
 
     # import scipy.io

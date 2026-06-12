@@ -6,8 +6,6 @@
 import os
 import time
 
-# from google.cloud import storage
-
 
 def gdrive_download(id="1HaXkef9z6y5l4vUnCYgdmEAj61c6bfWO", name="coco.zip"):
     """Downloads a file from Google Drive using its ID and saves it with the provided name, unzipping if necessary."""
@@ -15,7 +13,10 @@ def gdrive_download(id="1HaXkef9z6y5l4vUnCYgdmEAj61c6bfWO", name="coco.zip"):
     # from utils.google_utils import *; gdrive_download()
     t = time.time()
 
-    print(f"Downloading https://drive.google.com/uc?export=download&id={id} as {name}... ", end="")
+    print(
+        f"Downloading https://drive.google.com/uc?export=download&id={id} as {name}... ",
+        end="",
+    )
     if os.path.exists(name):  # remove existing
         os.remove(name)
 
@@ -49,8 +50,10 @@ def gdrive_download(id="1HaXkef9z6y5l4vUnCYgdmEAj61c6bfWO", name="coco.zip"):
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
-    """Uploads a file to a bucket: https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python."""
+    """Uploads a file to a bucket: https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python.
+    """
     # https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python
+    from google.cloud import storage
 
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(bucket_name)
@@ -63,6 +66,8 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 
 def download_blob(bucket_name, source_blob_name, destination_file_name):
     """Downloads a blob from a Google Cloud Storage bucket to a local file."""
+    from google.cloud import storage
+
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(bucket_name)
     blob = bucket.blob(source_blob_name)

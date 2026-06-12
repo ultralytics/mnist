@@ -45,8 +45,7 @@ def select_device(device="", apex=False, batch_size=None):
 
 
 def fuse_conv_and_bn(conv, bn):
-    """
-    Fuses a convolutional layer and a batch normalization layer into a single convolutional layer.
+    """Fuses a convolutional layer and a batch normalization layer into a single convolutional layer.
 
     https://tehnokv.com/posts/fusing-batchnorm-and-conv/
     """
