@@ -38,9 +38,7 @@ def main(model):
 
     # binary classifier dataset
     path = "../knife_classifier/"
-    d = [
-        path + x for x in os.listdir(path) if os.path.isdir(path + x)
-    ]  # category directories
+    d = [path + x for x in os.listdir(path) if os.path.isdir(path + x)]  # category directories
 
     x, y = [], []
     for i, c in enumerate(d):
@@ -60,9 +58,7 @@ def main(model):
     nc = len(np.unique(y))  # number of classes
 
     print("Splitting into train and validate sets...")
-    x, y, xtest, ytest, *_ = split_data(
-        x, y, train=0.8, validate=0.20, test=0.0, shuffle=True
-    )
+    x, y, xtest, ytest, *_ = split_data(x, y, train=0.8, validate=0.20, test=0.0, shuffle=True)
 
     print("Creating Train Dataloader...")
     train_loader = create_batches(
@@ -104,17 +100,13 @@ def main(model):
     # criteria2 = nn.BCEWithLogitsLoss()
 
     # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    optimizer = torch.optim.SGD(
-        model.parameters(), lr=lr, momentum=0.90, weight_decay=1e-5, nesterov=True
-    )
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.90, weight_decay=1e-5, nesterov=True)
     stopper = patienceStopper(epochs=epochs, patience=patience, printerval=printerval)
 
     print("Starting training...")
 
     def train(model):
-        pbar = tqdm(
-            enumerate(train_loader), desc="train", total=len(train_loader)
-        )  # progress bar
+        pbar = tqdm(enumerate(train_loader), desc="train", total=len(train_loader))  # progress bar
         for i, (x, y) in pbar:
             x, y = x.to(device), y.to(device)
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb
@@ -139,9 +131,7 @@ def main(model):
             optimizer.step()
 
     def test(model):
-        pbar = tqdm(
-            enumerate(test_loader), desc="test", total=len(test_loader)
-        )  # progress bar
+        pbar = tqdm(enumerate(test_loader), desc="test", total=len(test_loader))  # progress bar
         for i, (x, y) in pbar:
             x, y = x.to(device), y.to(device)
             # x = x.repeat([1, 3, 1, 1])  # grey to rgb

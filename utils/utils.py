@@ -65,8 +65,7 @@ def shuffle_data(x, y):  # randomly shuffle x and y by same axis=0 indices. no n
 
 
 def split_data(x, y, train=0.7, validate=0.15, test=0.15, shuffle=False):  # split training data
-    """Splits arrays x and y into training, validation, and test sets with specified ratios, optionally shuffling
-    them.
+    """Splits arrays x and y into training, validation, and test sets with specified ratios, optionally shuffling them.
     """
     n = x.shape[0]
     if shuffle:
