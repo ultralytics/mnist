@@ -95,8 +95,7 @@ class ConvNeta(nn.Module):
     """A convolutional neural network model with dropout and fully connected layers for image classification tasks."""
 
     def __init__(self):
-        """Initializes the ConvNeta neural network architecture with convolutional, dropout, and fully connected layers.
-        """
+        """Initializes the ConvNeta neural network architecture with convolutional, dropout, and fully connected layers."""
         super().__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
