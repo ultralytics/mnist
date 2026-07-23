@@ -2,7 +2,7 @@
 
 import scipy.io
 import torch
-import torch.nn as nn
+from torch import nn
 
 from models import ConvNetb
 from utils import torch_utils

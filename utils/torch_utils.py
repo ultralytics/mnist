@@ -34,13 +34,12 @@ def select_device(device="", apex=False, batch_size=None):
             if i == 1:
                 s = " " * len(s)
             print(
-                "%sdevice%g _CudaDeviceProperties(name='%s', total_memory=%dMB)"
-                % (s, i, x[i].name, x[i].total_memory / c)
+                f"{s}device{i:g} _CudaDeviceProperties(name='{x[i].name}', total_memory={int(x[i].total_memory / c):d}MB)"
             )
     else:
         print("Using CPU")
 
-    print("")  # skip a line
+    print()  # skip a line
     return torch.device("cuda:0" if cuda else "cpu")
 
 
@@ -80,12 +79,12 @@ def model_info(model, report="summary"):
     n_p = sum(x.numel() for x in model.parameters())  # number parameters
     n_g = sum(x.numel() for x in model.parameters() if x.requires_grad)  # number gradients
     if report == "full":
-        print("%5s %40s %9s %12s %20s %10s %10s" % ("layer", "name", "gradient", "parameters", "shape", "mu", "sigma"))
+        print(f"{'layer':>5} {'name':>40} {'gradient':>9} {'parameters':>12} {'shape':>20} {'mu':>10} {'sigma':>10}")
         for i, (name, p) in enumerate(model.named_parameters()):
             name = name.replace("module_list.", "")
             print(
-                "%5g %40s %9s %12g %20s %10.3g %10.3g"
-                % (i, name, p.requires_grad, p.numel(), list(p.shape), p.mean(), p.std())
+                f"{i:5g} {name:>40} {p.requires_grad!s:>9} {p.numel():12g} {list(p.shape)!s:>20} "
+                f"{p.mean():10.3g} {p.std():10.3g}"
             )
     print(f"Model Summary: {len(list(model.parameters())):g} layers, {n_p:g} parameters, {n_g:g} gradients")
 

@@ -7,7 +7,7 @@ import random
 import cv2
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 from tqdm import tqdm
 
 from utils import torch_utils
