@@ -7,7 +7,7 @@ import random
 import cv2
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 
 from utils import torch_utils
 from utils.utils import patienceStopper
