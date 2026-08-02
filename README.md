@@ -9,13 +9,13 @@ Welcome to the repository containing innovative software developed by Ultralytic
 [![Ultralytics Forums](https://img.shields.io/discourse/users?server=https%3A%2F%2Fcommunity.ultralytics.com&logo=discourse&label=Forums&color=blue)](https://community.ultralytics.com/)
 [![Ultralytics Reddit](https://img.shields.io/reddit/subreddit-subscribers/ultralytics?style=flat&logo=reddit&logoColor=white&label=Reddit&color=blue)](https://reddit.com/r/ultralytics)
 
-# 📗 Description
+## 📗 Description
 
 The repository at https://github.com/ultralytics/mnist is our dedicated playground for the [MNIST dataset](https://docs.ultralytics.com/datasets/classify/mnist/). 🖐 This repository houses sandbox code that allows for experimentation and training of different [neural network](https://www.ultralytics.com/glossary/neural-network-nn) architectures on the famous MNIST digit database.
 
 ![MNIST Examples](https://upload.wikimedia.org/wikipedia/commons/2/27/MnistExamples.png)
 
-# 📦 Requirements
+## 📦 Requirements
 
 Ensure you have Python 3.7 or later installed on your machine. The following packages are required, and you can install them using pip with the provided command: `pip3 install -U -r requirements.txt`.
 
@@ -27,7 +27,7 @@ Ensure you have Python 3.7 or later installed on your machine. The following pac
 - `h5py`: Provides HDF5 file support for reading large v7.3 `.mat` files in `train_xview_classes.py`.
 - `tqdm`: Progress bars used by `detect.py` and `train_resnet.py`.
 
-# 🏃‍♂️ Run
+## 🏃‍♂️ Run
 
 To start [training](https://docs.ultralytics.com/modes/train/) on the MNIST digits dataset, install the dependencies and execute `train.py` from the repository root:
 
@@ -38,20 +38,20 @@ python3 train.py
 
 The default script trains `ConvNetb` for 20 epochs using the bundled `data/MNISTtrain.mat` and `data/MNISTtest.mat` files, which were initially curated from Yann LeCun's [MNIST database](http://yann.lecun.com/exdb/mnist/). Additional experimental entry points include `train_resnet.py`, `train_sandd.py`, and `train_xview_classes.py`.
 
-# 🤝 Contribute
+## 💡 Contribute
 
 We welcome contributions from the community! Whether you're fixing bugs, adding new features, or improving documentation, your input is invaluable. Take a look at our [Contributing Guide](https://docs.ultralytics.com/help/contributing/) to get started. Also, we'd love to hear about your experience with Ultralytics products. Please consider filling out our [Survey](https://www.ultralytics.com/survey?utm_source=github&utm_medium=social&utm_campaign=Survey). A huge 🙏 and thank you to all of our contributors!
 
-[![Ultralytics open-source contributors](https://raw.githubusercontent.com/ultralytics/assets/main/im/image-contributors.png)](https://github.com/ultralytics/mnist/graphs/contributors)
+[![Ultralytics open-source contributors](https://raw.githubusercontent.com/ultralytics/assets/main/im/image-contributors.png)](https://github.com/ultralytics/ultralytics/graphs/contributors)
 
-# ©️ License
+## 📄 License
 
 Ultralytics is excited to offer two different licensing options to meet your needs:
 
 - **AGPL-3.0 License**: Perfect for students and hobbyists, this [OSI-approved](https://opensource.org/license/agpl-v3) open-source license encourages collaborative learning and knowledge sharing. Please refer to the [LICENSE](https://github.com/ultralytics/mnist/blob/main/LICENSE) file for detailed terms.
 - **Enterprise License**: Ideal for commercial use, this license allows for the integration of Ultralytics software and AI models into commercial products without the open-source requirements of AGPL-3.0. For use cases that involve commercial applications, please contact us via [Ultralytics Licensing](https://www.ultralytics.com/license).
 
-# 📬 Contact Us
+## 📮 Contact
 
 For bug reports, feature requests, and contributions, head to [GitHub Issues](https://github.com/ultralytics/mnist/issues). For questions and discussions about this project and other Ultralytics endeavors, join us on [Discord](https://discord.com/invite/ultralytics)!
 
