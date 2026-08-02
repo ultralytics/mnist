@@ -9,13 +9,13 @@ Welcome to the repository containing innovative software developed by Ultralytic
 [![Ultralytics Forums](https://img.shields.io/discourse/users?server=https%3A%2F%2Fcommunity.ultralytics.com&logo=discourse&label=Forums&color=blue)](https://community.ultralytics.com/)
 [![Ultralytics Reddit](https://img.shields.io/reddit/subreddit-subscribers/ultralytics?style=flat&logo=reddit&logoColor=white&label=Reddit&color=blue)](https://reddit.com/r/ultralytics)
 
-# 📗 Description
+## 📗 Description
 
 The repository at https://github.com/ultralytics/mnist is our dedicated playground for the [MNIST dataset](https://docs.ultralytics.com/datasets/classify/mnist/). 🖐 This repository houses sandbox code that allows for experimentation and training of different [neural network](https://www.ultralytics.com/glossary/neural-network-nn) architectures on the famous MNIST digit database.
 
 ![MNIST Examples](https://upload.wikimedia.org/wikipedia/commons/2/27/MnistExamples.png)
 
-# 📦 Requirements
+## 📦 Requirements
 
 Ensure you have Python 3.7 or later installed on your machine. The following packages are required, and you can install them using pip with the provided command: `pip3 install -U -r requirements.txt`.
 
@@ -27,7 +27,7 @@ Ensure you have Python 3.7 or later installed on your machine. The following pac
 - `h5py`: Provides HDF5 file support for reading large v7.3 `.mat` files in `train_xview_classes.py`.
 - `tqdm`: Progress bars used by `detect.py` and `train_resnet.py`.
 
-# 🏃‍♂️ Run
+## 🏃‍♂️ Run
 
 To start [training](https://docs.ultralytics.com/modes/train/) on the MNIST digits dataset, install the dependencies and execute `train.py` from the repository root:
 
