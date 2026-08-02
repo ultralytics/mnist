@@ -24,7 +24,8 @@ Ensure you have Python 3.7 or later installed on your machine. The following pac
 - `torch`: [PyTorch](https://pytorch.org/), an open-source machine learning library for Python.
 - `torchvision`: A PyTorch package that includes datasets and model architectures for [computer vision](https://www.ultralytics.com/glossary/computer-vision-cv).
 - `opencv-python`: An open-source computer vision and [machine learning](https://www.ultralytics.com/glossary/machine-learning-ml) software library.
-- `h5py`: Provides HDF5 file support for data workflows.
+- `h5py`: Provides HDF5 file support for reading large v7.3 `.mat` files in `train_xview_classes.py`.
+- `tqdm`: Progress bars used by `detect.py` and `train_resnet.py`.
 
 # 🏃‍♂️ Run
 

@@ -5,3 +5,4 @@ torchvision
 opencv-python
 h5py
 scipy
+tqdm
