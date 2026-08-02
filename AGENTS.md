@@ -31,8 +31,8 @@ After opening a PR:
 ## Commands
 
 ```bash
-pip3 install -U -r requirements.txt  # numpy, torch, torchvision, opencv-python, h5py, scipy, tqdm
-python3 train.py                     # trains ConvNetb for 20 epochs on the bundled data/MNIST*.mat
+pip3 install -U -r requirements.txt # numpy, torch, torchvision, opencv-python, h5py, scipy, tqdm
+python3 train.py                    # trains ConvNetb for 20 epochs on the bundled data/MNIST*.mat
 ```
 
 Only `train.py` runs on a clean checkout. `train_resnet.py`, `train_sandd.py`, `train_xview_classes.py`, and `detect.py` need local datasets or checkpoints that are not in the repository, plus `pretrainedmodels` for the ResNet paths. There is no test suite; CI is `.github/workflows/format.yml` (Ruff, docformatter, Prettier, codespell auto-applied to PR branches) and `cla.yml`.
