@@ -38,20 +38,20 @@ python3 train.py
 
 The default script trains `ConvNetb` for 20 epochs using the bundled `data/MNISTtrain.mat` and `data/MNISTtest.mat` files, which were initially curated from Yann LeCun's [MNIST database](http://yann.lecun.com/exdb/mnist/). Additional experimental entry points include `train_resnet.py`, `train_sandd.py`, and `train_xview_classes.py`.
 
-# 🤝 Contribute
+## 💡 Contribute
 
 We welcome contributions from the community! Whether you're fixing bugs, adding new features, or improving documentation, your input is invaluable. Take a look at our [Contributing Guide](https://docs.ultralytics.com/help/contributing/) to get started. Also, we'd love to hear about your experience with Ultralytics products. Please consider filling out our [Survey](https://www.ultralytics.com/survey?utm_source=github&utm_medium=social&utm_campaign=Survey). A huge 🙏 and thank you to all of our contributors!
 
-[![Ultralytics open-source contributors](https://raw.githubusercontent.com/ultralytics/assets/main/im/image-contributors.png)](https://github.com/ultralytics/mnist/graphs/contributors)
+[![Ultralytics open-source contributors](https://raw.githubusercontent.com/ultralytics/assets/main/im/image-contributors.png)](https://github.com/ultralytics/ultralytics/graphs/contributors)
 
-# ©️ License
+## 📄 License
 
 Ultralytics is excited to offer two different licensing options to meet your needs:
 
 - **AGPL-3.0 License**: Perfect for students and hobbyists, this [OSI-approved](https://opensource.org/license/agpl-v3) open-source license encourages collaborative learning and knowledge sharing. Please refer to the [LICENSE](https://github.com/ultralytics/mnist/blob/main/LICENSE) file for detailed terms.
 - **Enterprise License**: Ideal for commercial use, this license allows for the integration of Ultralytics software and AI models into commercial products without the open-source requirements of AGPL-3.0. For use cases that involve commercial applications, please contact us via [Ultralytics Licensing](https://www.ultralytics.com/license).
 
-# 📬 Contact Us
+## 📮 Contact
 
 For bug reports, feature requests, and contributions, head to [GitHub Issues](https://github.com/ultralytics/mnist/issues). For questions and discussions about this project and other Ultralytics endeavors, join us on [Discord](https://discord.com/invite/ultralytics)!
 
