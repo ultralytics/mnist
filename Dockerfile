@@ -18,14 +18,6 @@ COPY . /usr/src/app
 
 # ---------------------------------------------------  Extras Below  ---------------------------------------------------
 
-# Build
-# rm -rf yolov3  # Warning: remove existing
-# git clone https://github.com/ultralytics/yolov3 && cd yolov3 && python3 detect.py
-# sudo docker image prune -af && sudo docker build -t ultralytics/yolov3:v0 .
-
-# Run
-# sudo nvidia-docker run --ipc=host ultralytics/yolov3:v0 python3 detect.py
-
 # Run with local directory access
 # sudo nvidia-docker run --ipc=host --mount type=bind,source="$(pwd)"/knife_classifier,target=/usr/src/knife_classifier ultralytics/mnist:v0 python3 train_resnet.py
 
@@ -37,6 +29,3 @@ COPY . /usr/src/app
 
 # Kill all
 # sudo docker kill $(sudo docker ps -q)
-
-# Run bash for loop
-# sudo nvidia-docker run --ipc=host ultralytics/yolov3:v0 while true; do python3 train.py --evolve; done
